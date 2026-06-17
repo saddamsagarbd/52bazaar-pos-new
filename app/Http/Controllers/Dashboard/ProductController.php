@@ -88,9 +88,9 @@ class ProductController extends Controller
          */
         if ($file = $request->file('image')) {
             $fileName = hexdec(uniqid()).'.'.$file->getClientOriginalExtension();
-            $path = 'public/products/';
+            $path = 'products';
 
-            $file->storeAs($path, $fileName);
+            $file->storeAs($path, $fileName, 'public');
             $validatedData['image'] = $fileName;
         }
 
@@ -139,20 +139,21 @@ class ProductController extends Controller
          */
         if ($file = $request->file('image')) {
             $fileName = hexdec(uniqid()).'.'.$file->getClientOriginalExtension();
-            $path = 'public/products/';
+            $path = 'products';
 
             /**
              * Delete photo if exists.
              */
             if ($product->image) {
-                Storage::delete($path . $product->image);
+                Storage::disk('public')->delete($path . '/' . $product->image);
             }
 
-            $file->storeAs($path, $fileName);
+            $file->storeAs($path, $fileName, 'public');
             $validatedData['image'] = $fileName;
         }
 
-        Product::where('id', $product->id)->update($validatedData);
+        // Product::where('id', $product->id)->update($validatedData);
+        $product->update($validatedData);
 
         return Redirect::route('products.index')->with('success', 'Product has been updated!');
     }

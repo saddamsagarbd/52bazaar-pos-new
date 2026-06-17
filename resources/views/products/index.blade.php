@@ -111,7 +111,7 @@
                         <tr>
                             <td>{{ (($products->currentPage() * 10) - 10) + $loop->iteration  }}</td>
                             <td>
-                                <img class="avatar-60 rounded" src="{{ $product->image ? asset('storage/products/'.$product->image) : asset('assets/images/product/default.webp') }}">
+                                <img class="avatar-60 rounded" src="{{ $product->image ? asset('storage/products/' . $product->image) : asset('assets/images/product/default.webp') }}">
                             </td>
                             <td>{{ $product->name }}</td>
                             <td>{{ $product->category->name }}</td>
