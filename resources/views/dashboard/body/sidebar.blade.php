@@ -69,20 +69,20 @@
                                 <li class="{{ Request::is(['products']) ? 'active' : '' }}">
                                     <a href="{{ route('products.index') }}">
                                         <x-heroicon-o-arrow-right class="w-4 h-4" /><span>Products</span>
-                                        </a>
-                                        </li>
-                                        <li class="{{ Request::is(['products/create']) ? 'active' : '' }}">
-                                            <a href="{{ route('products.create') }}">
+                                    </a>
+                                </li>
+                                <li class="{{ Request::is(['products/create']) ? 'active' : '' }}">
+                                    <a href="{{ route('products.create') }}">
                                         <x-heroicon-o-arrow-right class="w-4 h-4" /><span>Add Product</span>
-                                        </a>
-                                        </li>
-                                        <li class="{{ Request::is(['categories*']) ? 'active' : '' }}">
-                                            <a href="{{ route('categories.index') }}">
+                                    </a>
+                                </li>
+                                <li class="{{ Request::is(['categories*']) ? 'active' : '' }}">
+                                    <a href="{{ route('categories.index') }}">
                                         <x-heroicon-o-arrow-right class="w-4 h-4" /><span>Categories</span>
-                                        </a>
-                                        </li>
-                                        </ul>
-                                        </li>
+                                    </a>
+                                </li>
+                            </ul>
+                    </li>
                 @endif
 
                 <hr>

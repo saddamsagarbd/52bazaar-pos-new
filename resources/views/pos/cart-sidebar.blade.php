@@ -82,10 +82,10 @@
         <span class="text-secondary small">Subtotal</span>
         <span class="font-weight-bold">{{ Cart::subtotal() }}</span>
     </div>
-    <div class="d-flex justify-content-between mb-3">
+    <!-- <div class="d-flex justify-content-between mb-3">
         <span class="text-secondary small">Tax</span>
         <span class="font-weight-bold">{{ Cart::tax() }}</span>
-    </div>
+    </div> -->
     <div class="d-flex justify-content-between mb-3 align-items-center">
         <span class="text-secondary small">Discount</span>
         <input type="number" class="form-control form-control-sm text-right" id="discount" value="0" oninput="calculateChange()" min="0" style="width: 100px;">
