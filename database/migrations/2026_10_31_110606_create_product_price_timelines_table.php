@@ -11,12 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_price_timelines', function (Blueprint $table) {
+        Schema::create('product_batches', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->constrained('products')->nullOnDelete();
+            $table->foreignId('product_id')->nullable()->constrained('products')->nullOnDelete();
+            $table->string('batch_no')->unique();
             $table->decimal('purchase_rate', 15, 2)->default(0);
             $table->decimal('selling_rate', 15, 2)->default(0);
-            $table->date('effective_date')->nullable();
+            $table->decimal('initial_qty', 15, 2)->default(0);
+            $table->decimal('remaining_qty', 15, 2)->default(0);
+            $table->date('purchase_date')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_price_timelines');
+        Schema::dropIfExists('product_batches');
     }
 };
