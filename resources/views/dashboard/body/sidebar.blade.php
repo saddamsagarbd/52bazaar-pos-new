@@ -23,8 +23,8 @@
                         <a href="{{ route('pos.index') }}" class="svg-icon">
                             <x-heroicon-o-shopping-cart class="w-6 h-6" />
                             <span class="ml-3">POS</span>
-                            </a>
-                            </li>
+                        </a>
+                    </li>
                 @endif
 
                 <hr>
@@ -32,30 +32,48 @@
                 @if (auth()->user()->can('orders.menu'))
                     <li>
                         <a href="#orders" class="collapsed" data-toggle="collapse" aria-expanded="false">
-                            <x-heroicon-o-shopping-bag class="w-6 h-6" />
-                            <span class="ml-3">Orders</span>
-                            <x-heroicon-o-chevron-right class="w-4 h-4 iq-arrow-right arrow-active" />
-                            </a>
-                            <ul id="orders" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
+                                <x-heroicon-o-shopping-bag class="w-6 h-6" />
+                                <span class="ml-3">Orders</span>
+                                <x-heroicon-o-chevron-right class="w-4 h-4 iq-arrow-right arrow-active" />
+                        </a>
+                        <ul id="orders" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
 
                             <li class="{{ Request::is('orders/pending*') ? 'active' : '' }}">
                                 <a href="{{ route('order.pendingOrders') }}">
                                     <x-heroicon-o-arrow-right class="w-4 h-4" /><span>Pending Orders</span>
-                                    </a>
-                                    </li>
-                                    <li class="{{ Request::is('orders/complete*') ? 'active' : '' }}">
-                                        <a href="{{ route('order.completeOrders') }}">
+                                </a>
+                            </li>
+                            <li class="{{ Request::is('orders/complete*') ? 'active' : '' }}">
+                                <a href="{{ route('order.completeOrders') }}">
                                     <x-heroicon-o-arrow-right class="w-4 h-4" /><span>Complete Orders</span>
-                                    </a>
-                                    </li>
-                                    <li class="{{ Request::is('pending/due*') ? 'active' : '' }}">
-                                        <a href="{{ route('order.pendingDue') }}">
+                                </a>
+                            </li>
+                            <li class="{{ Request::is('pending/due*') ? 'active' : '' }}">
+                                <a href="{{ route('order.pendingDue') }}">
                                     <x-heroicon-o-arrow-right class="w-4 h-4" /><span>Pending Due</span>
-                                    </a>
-                                    </li>
+                                </a>
+                            </li>
 
-                                    </ul>
-                                    </li>
+                        </ul>
+                    </li>
+                @endif
+
+                @if (auth()->user()->can('outlet.menu'))
+                    <li>
+                        <a href="#outlets" class="collapsed" data-toggle="collapse" aria-expanded="false">
+                            <x-heroicon-o-archive-box class="w-6 h-6" />
+                            <span class="ml-3">Outlets</span>
+                            <x-heroicon-o-chevron-right class="w-4 h-4 iq-arrow-right arrow-active" />
+                        </a>
+                        <ul id="outlets" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
+                            <li class="{{ Request::is(['outlets']) ? 'active' : '' }}">
+                                <a href="{{ route('outlets.index') }}">
+                                    <x-heroicon-o-arrow-right class="w-4 h-4" /><span>Outlets</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
                 @endif
 
                 @if (auth()->user()->can('product.menu'))
@@ -64,24 +82,24 @@
                             <x-heroicon-o-archive-box class="w-6 h-6" />
                             <span class="ml-3">Products</span>
                             <x-heroicon-o-chevron-right class="w-4 h-4 iq-arrow-right arrow-active" />
-                            </a>
-                            <ul id="products" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
-                                <li class="{{ Request::is(['products']) ? 'active' : '' }}">
-                                    <a href="{{ route('products.index') }}">
-                                        <x-heroicon-o-arrow-right class="w-4 h-4" /><span>Products</span>
-                                    </a>
-                                </li>
-                                <li class="{{ Request::is(['products/create']) ? 'active' : '' }}">
-                                    <a href="{{ route('products.create') }}">
-                                        <x-heroicon-o-arrow-right class="w-4 h-4" /><span>Add Product</span>
-                                    </a>
-                                </li>
-                                <li class="{{ Request::is(['categories*']) ? 'active' : '' }}">
-                                    <a href="{{ route('categories.index') }}">
-                                        <x-heroicon-o-arrow-right class="w-4 h-4" /><span>Categories</span>
-                                    </a>
-                                </li>
-                            </ul>
+                        </a>
+                        <ul id="products" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
+                            <li class="{{ Request::is(['products']) ? 'active' : '' }}">
+                                <a href="{{ route('products.index') }}">
+                                    <x-heroicon-o-arrow-right class="w-4 h-4" /><span>Products</span>
+                                </a>
+                            </li>
+                            <li class="{{ Request::is(['products/create']) ? 'active' : '' }}">
+                                <a href="{{ route('products.create') }}">
+                                    <x-heroicon-o-arrow-right class="w-4 h-4" /><span>Add Product</span>
+                                </a>
+                            </li>
+                            <li class="{{ Request::is(['categories*']) ? 'active' : '' }}">
+                                <a href="{{ route('categories.index') }}">
+                                    <x-heroicon-o-arrow-right class="w-4 h-4" /><span>Categories</span>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 @endif
 

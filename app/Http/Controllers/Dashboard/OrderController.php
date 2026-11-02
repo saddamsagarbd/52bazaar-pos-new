@@ -87,6 +87,64 @@ class OrderController extends Controller
     {
         // Validation handled by StoreOrderRequest
 
+        // return DB::transaction(function () use ($request) {
+        //     $invoice_no = IdGenerator::generate([
+        //         'table' => 'orders',
+        //         'field' => 'invoice_no',
+        //         'length' => 10,
+        //         'prefix' => 'INV-'
+        //     ]);
+
+        //     $total        = (float) Cart::total(null, null, ''); // Get float value
+        //     $pay_amount   = $request->pay_amount;
+        //     $discount     = (float) $request->discount;
+        //     $net_payable  = $total - $discount;
+        //     $due_amount   = $net_payable - $pay_amount;
+
+        //     $order = Order::create([
+        //         'customer_id' => $request->customer_id,
+        //         'invoice_no' => $invoice_no,
+        //         'order_date' => Carbon::now(),
+        //         'order_status' => 'pending',
+        //         'total_products' => Cart::count(),
+        //         'sub_total' => (float) Cart::subtotal(null, null, ''),
+        //         'discount' => (float) $request->discount,
+        //         'vat' => (float) Cart::tax(null, null, ''),
+        //         'total' => (float) $net_payable,
+        //         'payment_type' => $request->payment_type,
+        //         'pay_amount' => $pay_amount,
+        //         'due_amount' => $due_amount,
+        //     ]);
+
+        //     // Create Order Details
+        //     $contents = Cart::content();
+        //     foreach ($contents as $content) {
+        //         OrderDetails::create([
+        //             'order_id' => $order->id,
+        //             'product_id' => $content->id,
+        //             'quantity' => $content->qty,
+        //             'unit_price' => $content->price,
+        //             'total' => $content->total,
+        //         ]);
+        //     }
+
+        //     // Clear Cart
+        //     Cart::destroy();
+
+        //     if ($request->wantsJson()) {
+        //         // Return success with Invoice URL and Cleared Cart HTML
+        //         return response()->json([
+        //             'success' => true,
+        //             'message' => 'Order created successfully!',
+        //             'invoice_url' => route('order.invoiceDownload', $order->id),
+        //             'cart_html' => view('pos.cart-sidebar', ['productItem' => Cart::content()])->render(),
+        //             'cart_count' => Cart::count(),
+        //         ]);
+        //     }
+
+        //     return Redirect::route('order.invoiceDownload', $order->id)->with('success', 'Order has been created!');
+        // });
+
         return DB::transaction(function () use ($request) {
             $invoice_no = IdGenerator::generate([
                 'table' => 'orders',
@@ -95,50 +153,68 @@ class OrderController extends Controller
                 'prefix' => 'INV-'
             ]);
 
-            $total        = (float) Cart::total(null, null, ''); // Get float value
-            $pay_amount   = $request->pay_amount;
-            $discount     = (float) $request->discount;
-            $net_payable  = $total - $discount;
-            $due_amount   = $net_payable - $pay_amount;
+            $items = $request->input('items', []);
+            
+            // ২. সাবটোটাল, ডিসকাউন্ট এবং নেট অ্যামাউন্ট হিসাব করা
+            $sub_total = 0;
+            foreach ($items as $item) {
+                $sub_total += $item['price'] * $item['qty'];
+            }
 
+            $discount = (float) $request->input('discount', 0);
+            $vat = 0; // যদি ভ্যাট থাকে এখানে যোগ করতে পারেন
+            $net_payable = ($sub_total - $discount) + $vat;
+            
+            $pay_amount = (float) $request->input('pay_amount', 0);
+            $due_amount = $net_payable - $pay_amount;
+            if ($due_amount < 0) {
+                $due_amount = 0; // অ্যাডভান্স পেমেন্ট হলে ডিউ জিরো বা নেগেটিভ রাখতে পারেন
+            }
+
+            // ৩. Order Master Table-এ ডেটা সেভ করা
             $order = Order::create([
                 'customer_id' => $request->customer_id,
                 'invoice_no' => $invoice_no,
                 'order_date' => Carbon::now(),
-                'order_status' => 'pending',
-                'total_products' => Cart::count(),
-                'sub_total' => (float) Cart::subtotal(null, null, ''),
-                'discount' => (float) $request->discount,
-                'vat' => (float) Cart::tax(null, null, ''),
-                'total' => (float) $net_payable,
+                'order_status' => 'completed', // অথবা pending
+                'total_products' => count($items),
+                'sub_total' => $sub_total,
+                'discount' => $discount,
+                'vat' => $vat,
+                'total' => $net_payable,
                 'payment_type' => $request->payment_type,
+                'payment_reference' => $request->payment_reference ?? null,
                 'pay_amount' => $pay_amount,
                 'due_amount' => $due_amount,
             ]);
 
-            // Create Order Details
-            $contents = Cart::content();
-            foreach ($contents as $content) {
+            // ৪. Table-এর প্রতিটি item থেকে Order Details বা আইটেমগুলো সেভ করা
+            foreach ($items as $item) {
+                $unitPrice = (float) $item['price'];
+                $quantity = (float) $item['qty'];
+                
                 OrderDetails::create([
                     'order_id' => $order->id,
-                    'product_id' => $content->id,
-                    'quantity' => $content->qty,
-                    'unit_price' => $content->price,
-                    'total' => $content->total,
+                    'product_id' => $item['id'],
+                    'quantity' => $quantity,
+                    'unit_price' => $unitPrice,
+                    'total' => $unitPrice * $quantity,
                 ]);
+
+                // (ঐচ্ছিক) প্রোডাক্ট স্টক আপডেট বা কমানোর কোড এখানে দিতে পারেন
+                // $product = Product::find($item['id']);
+                // if($product) {
+                //     $product->stock -= $quantity;
+                //     $product->save();
+                // }
             }
 
-            // Clear Cart
-            Cart::destroy();
-
-            if ($request->wantsJson()) {
-                // Return success with Invoice URL and Cleared Cart HTML
+            // ৫. JSON Response রিটার্ন করা (AJAX Checkout এর জন্য)
+            if ($request->wantsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => true,
                     'message' => 'Order created successfully!',
                     'invoice_url' => route('order.invoiceDownload', $order->id),
-                    'cart_html' => view('pos.cart-sidebar', ['productItem' => Cart::content()])->render(),
-                    'cart_count' => Cart::count(),
                 ]);
             }
 

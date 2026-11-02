@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Dashboard\ProductController;
 use App\Http\Controllers\Dashboard\ProfileController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\Dashboard\AdvanceSalaryController;
 use App\Http\Controllers\Dashboard\DatabaseBackupController;
 use App\Http\Controllers\Dashboard\HelpController;
 use App\Http\Controllers\Dashboard\OrderController;
+use App\Http\Controllers\Dashboard\OutletController;
 use App\Http\Controllers\Dashboard\PosController;
 use App\Http\Controllers\Dashboard\RoleController;
 use App\Http\Controllers\Dashboard\UserController;
@@ -29,9 +31,11 @@ use App\Http\Controllers\Dashboard\UserController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
+Route::get('/', [AuthenticatedSessionController::class, 'create']);
 
 
 // DEFAULT DASHBOARD & PROFILE
@@ -94,6 +98,11 @@ Route::middleware(['permission:product.menu'])->group(function () {
     Route::resource('/products', ProductController::class);
 });
 
+// ====== OUTLETS ======
+Route::middleware(['permission:outlet.menu'])->group(function () {
+    Route::resource('/outlets', OutletController::class);
+});
+
 // ====== CATEGORY PRODUCTS ======
 Route::middleware(['permission:category.menu'])->group(function () {
     Route::resource('/categories', CategoryController::class);
@@ -107,6 +116,7 @@ Route::middleware(['permission:pos.menu'])->group(function () {
     Route::get('/pos/delete/{rowId}', [PosController::class, 'deleteCart'])->name('pos.deleteCart');
     Route::post('/pos/customer', [PosController::class, 'storeCustomer'])->name('pos.storeCustomer');
     Route::get('/pos/customers-ajax', [PosController::class, 'searchCustomers'])->name('pos.customers.search');
+    Route::get('/pos/product-ajax', [PosController::class, 'searchProducts'])->name('pos.product.search');
 
     Route::post('/pos/invoice/print/{order_id}', [PosController::class, 'printInvoice'])->name('pos.printInvoice');
 

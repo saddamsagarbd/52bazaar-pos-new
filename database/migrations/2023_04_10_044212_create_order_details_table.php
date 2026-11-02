@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_id')->constrained()->onDelete('cascade');
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
-            $table->integer('quantity');
+            $table->decimal('quantity', 15, 2);
             $table->decimal('unit_price', 15, 2); // Selling price at that time
             $table->decimal('total', 15, 2); // Qty * Price
             $table->timestamps();

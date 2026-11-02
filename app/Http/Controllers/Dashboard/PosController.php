@@ -165,6 +165,34 @@ class PosController extends Controller
         return response()->json(['results' => $customers]);
     }
 
+    public function searchProducts(Request $request)
+    {
+        $term = $request->term;
+        $query = Product::query();
+
+        if ($term) {
+            $query->where('name', 'LIKE', "%{$term}%")
+                ->orWhere('slug', 'LIKE', "%{$term}%")
+                ->orWhere('code', 'LIKE', "%{$term}%");
+        }
+
+        $products = $query->latest()->get()->map(function ($product) {
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'code' => $product->code ?? 'N/A',
+                'selling_price' => $product->selling_price ?? 0,
+                'stock' => $product->stock ?? 0,
+                'text' => $product->name . ' (' . ($product->code ?? 'N/A') . ')'
+            ];
+        });
+
+        return response()->json([
+            'products' => $products, 
+            'results' => $products
+        ]);
+    }
+
     public function printInvoice(int $order_id)
     {
         $order = Order::with('customer')->findOrFail($order_id);

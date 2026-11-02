@@ -64,6 +64,13 @@ class ProductController extends Controller
         ]);
     }
 
+    public function outlet()
+    {
+        return view('outlet.index', [
+            'categories' => Category::all(),
+        ]);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
