@@ -106,11 +106,17 @@
                                 <td>{{ $outlet->parent->name ?? "N/A" }}</td>
                                 <td>{{ $outlet->address }}</td>
                                 <td>
-                                    @if ($outlet->status == 1)
-                                        <span class="badge rounded-pill bg-success">Running</span>
-                                    @else
-                                        <span class="badge rounded-pill bg-danger">Closed</span>
-                                    @endif
+                                    <form action="{{ route('outlets.update', $outlet->id) }}" method="POST" style="display:inline;">
+                                        @method('put')
+                                        @csrf
+                                        <button type="submit" class="border-0 bg-transparent p-0" onclick="return confirm('Are you sure you want to update this status?')" data-toggle="tooltip" data-placement="top" title="Update Status">
+                                            @if ($outlet->status == 1)
+                                                <span class="badge rounded-pill bg-success">Running</span>
+                                            @else
+                                                <span class="badge rounded-pill bg-danger">Closed</span>
+                                            @endif
+                                        </button>
+                                    </form>
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center list-action">
