@@ -21,12 +21,14 @@
                         <form action="{{ route('outlets.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
+                            <input type="hidden" name="row_id" value="{{ $outlet->id ?? '' }}">
+
                             <!-- begin: Input Data -->
                             <div class="row align-items-center">
                                 <div class="form-group col-md-6">
                                     <label for="name">Outlet Name <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name"
-                                        value="{{ old('name') }}" required>
+                                        value="{{ old('name') ?? $outlet->name ?? '' }}" required>
                                     @error('name')
                                         <div class="invalid-feedback">
                                             {{ $message }}
@@ -38,9 +40,16 @@
                                     <label for="parent_id">Parent Outlet</label>
                                     <select class="form-control" name="parent_id">
                                         <option selected="" disabled>-- Select outlet --</option>
-                                        @foreach ($outlets as $outlet)
-                                            <option value="{{ $outlet->id }}" {{ old('parent_id') == $outlet->id ? 'selected' : '' }}>
-                                                {{ $outlet->code }} - {{ $outlet->name }}</option>
+                                        @foreach ($outlets as $item)                        
+
+                                            @if(isset($outlet) && $outlet->id == $item->id) 
+                                                @continue 
+                                            @endif
+
+                                            <option value="{{ $item->id }}" 
+                                                {{ old('parent_id', isset($outlet) ? $outlet->parent_id : '') == $item->id ? 'selected' : '' }}>
+                                                {{ $item->code }} - {{ $item->name }}
+                                            </option>
                                         @endforeach
                                     </select>
                                     @error('parent_id')
@@ -51,7 +60,7 @@
                                 </div>
                                 <div class="form-group col-md-12">
                                     <label for="address">Address</label>
-                                    <textarea class="form-control" name="address" id="address"></textarea>
+                                    <textarea class="form-control" name="address" id="address">{{ $outlet->address ?? '' }}</textarea>
                                     @error('name')
                                         <div class="invalid-feedback">
                                             {{ $message }}

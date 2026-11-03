@@ -3,8 +3,13 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Outlet\StoreOutletRequest;
 use App\Models\Outlet;
+use Haruncpi\LaravelIdGenerator\IdGenerator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redirect;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 use Spatie\QueryBuilder\AllowedSort;
@@ -66,25 +71,75 @@ class OutletController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreOutletRequest $request)
     {
-        //
+        DB::beginTransaction();
+        
+        try {
+            $validatedData = $request->validated();
+
+            $isUpdate = $request->filled('row_id');
+
+            if ($isUpdate) {
+                $outlet = Outlet::findOrFail($request->row_id);
+
+                if (!isset($validatedData['code']) || empty($validatedData['code'])) {
+                    $validatedData['code'] = $outlet->code;
+                }
+
+                unset($validatedData['row_id']);
+
+                $outlet->update($validatedData);
+
+                $message = 'Outlet has been updated successfully!';
+            } else {
+                if (!isset($validatedData['code']) || empty($validatedData['code'])) {
+                    $validatedData['code'] = IdGenerator::generate([
+                        'table' => 'outlets',
+                        'field' => 'code',
+                        'length' => 4,
+                        'prefix' => 'OC'
+                    ]);
+                }
+
+                Outlet::create($validatedData);
+
+                $message = 'Outlet has been created successfully!';
+            }
+
+            DB::commit();
+
+            return Redirect::route('outlets.index')->with('success', $message);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            Log::error("Outlet Error: " . $e->getMessage(), ['error' => $e->getMessage()]);
+
+            return redirect()->back()->withInput()->with('error', 'Something went wrong. Please try again later.');
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Outlet $outlet)
     {
-        //
+        $compactData = compact('outlet');
+
+        return view('outlet.show', $compactData);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Outlet $outlet)
     {
-        //
+        $outlets = Outlet::where('status', true)->select('name', 'code', 'id')->get();
+
+        $compactData = compact('outlets', 'outlet');
+
+        return view('outlet.create', $compactData);
     }
 
     /**
@@ -98,8 +153,14 @@ class OutletController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Outlet $outlet)
     {
-        //
+        $outlet = Outlet::findOrFail($outlet->id);
+
+        $outlet->update([
+            'status' => 0
+        ]);
+
+        return Redirect::route('outlets.index')->with('success', 'Outlet has been closed!');
     }
 }

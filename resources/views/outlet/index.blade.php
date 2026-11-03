@@ -101,32 +101,28 @@
                         <tbody class="ligth-body">
                             @forelse ($outlets as $outlet)
                             <tr>
-                                <td>{{ (($products->currentPage() * 10) - 10) + $loop->iteration  }}</td>
+                                <td>{{ (($outlets->currentPage() - 1) * $outlets->perPage()) + $loop->iteration }}</td>
+                                <td>{{ $outlet->name }}</td>
+                                <td>{{ $outlet->parent->name ?? "N/A" }}</td>
+                                <td>{{ $outlet->address }}</td>
                                 <td>
-                                    <img class="avatar-60 rounded" src="{{ $product->image ? asset('storage/products/' . $product->image) : asset('assets/images/product/default.webp') }}">
-                                </td>
-                                <td>{{ $product->name }}</td>
-                                <td>{{ $product->category->name }}</td>
-                                <td>{{ $product->selling_price }}</td>
-                                <td>{{ $product->stock }}</td>
-                                <td>
-                                    @if ($product->expire_date > Carbon\Carbon::now()->format('Y-m-d'))
-                                        <span class="badge rounded-pill bg-success">Valid</span>
+                                    @if ($outlet->status == 1)
+                                        <span class="badge rounded-pill bg-success">Running</span>
                                     @else
-                                        <span class="badge rounded-pill bg-danger">Invalid</span>
+                                        <span class="badge rounded-pill bg-danger">Closed</span>
                                     @endif
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center list-action">
                                         <a class="btn btn-info mr-2" data-toggle="tooltip" data-placement="top" title="View"
-                                            href="{{ route('products.show', $product->id) }}">
+                                            href="{{ route('outlets.show', $outlet->id) }}">
                                             <x-heroicon-o-eye class="w-5 h-5 mr-0" />
                                         </a>
                                         <a class="btn btn-warning mr-2" data-toggle="tooltip" data-placement="top" title="Edit"
-                                            href="{{ route('products.edit', $product->id) }}">
+                                            href="{{ route('outlets.edit', $outlet->id) }}">
                                             <x-heroicon-o-pencil class="w-5 h-5 mr-0" />
                                         </a>
-                                        <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display:inline;">
+                                        <form action="{{ route('outlets.destroy', $outlet->id) }}" method="POST" style="display:inline;">
                                             @method('delete')
                                             @csrf
                                             <button type="submit" class="btn btn-danger border-0" onclick="return confirm('Are you sure you want to delete this record?')" data-toggle="tooltip" data-placement="top" title="Delete">
