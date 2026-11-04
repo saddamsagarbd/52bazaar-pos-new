@@ -18,6 +18,7 @@ use App\Http\Controllers\Dashboard\OrderController;
 use App\Http\Controllers\Dashboard\OutletController;
 use App\Http\Controllers\Dashboard\PosController;
 use App\Http\Controllers\Dashboard\RoleController;
+use App\Http\Controllers\Dashboard\StockController;
 use App\Http\Controllers\Dashboard\UserController;
 
 /*
@@ -36,6 +37,9 @@ use App\Http\Controllers\Dashboard\UserController;
 // });
 
 Route::get('/', [AuthenticatedSessionController::class, 'create']);
+
+Route::get('/api/search/products', [ProductController::class, 'search'])->name('api.products.search');
+Route::get('/api/search/outlets', [OutletController::class, 'search'])->name('api.outlets.search');
 
 
 // DEFAULT DASHBOARD & PROFILE
@@ -101,6 +105,11 @@ Route::middleware(['permission:product.menu'])->group(function () {
 // ====== OUTLETS ======
 Route::middleware(['permission:outlet.menu'])->group(function () {
     Route::resource('/outlets', OutletController::class);
+});
+
+// ====== STOCKS ======
+Route::middleware(['permission:stock.menu'])->group(function () {
+    Route::resource('/stocks', StockController::class);
 });
 
 // ====== CATEGORY PRODUCTS ======

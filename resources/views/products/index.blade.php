@@ -100,9 +100,7 @@
                             <th>Photo</th>
                             <th><x-sort-link name="name" label="Name" /></th>
                             <th><x-sort-link name="category.name" label="Category" /></th>
-                            <th><x-sort-link name="selling_price" label="Price" /></th>
-                            <th><x-sort-link name="stock" label="Stock" /></th>
-                            <th>Status</th>
+                            <th><x-sort-link name="unit.name" label="Unit" /></th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -115,15 +113,7 @@
                             </td>
                             <td>{{ $product->name }}</td>
                             <td>{{ $product->category->name }}</td>
-                            <td>{{ $product->selling_price }}</td>
-                            <td>{{ $product->stock }}</td>
-                            <td>
-                                @if ($product->expire_date > Carbon\Carbon::now()->format('Y-m-d'))
-                                    <span class="badge rounded-pill bg-success">Valid</span>
-                                @else
-                                    <span class="badge rounded-pill bg-danger">Invalid</span>
-                                @endif
-                            </td>
+                            <td>{{ $product->unit->name ?? "N/A" }}</td>
                             <td>
                                 <div class="d-flex align-items-center list-action">
                                     <a class="btn btn-info mr-2" data-toggle="tooltip" data-placement="top" title="View"

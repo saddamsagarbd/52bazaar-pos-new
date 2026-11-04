@@ -12,4 +12,9 @@ class Outlet extends Model
     public function parent():BelongsTo{
         return $this->belongsTo(Outlet::class, 'parent_id');
     }
+
+    public function stocks()
+    {
+        return $this->hasMany(Stock::class);
+    }
 }

@@ -14,6 +14,7 @@ class Product extends Model
         'slug',
         'code',
         'category_id',
+        'unit_id',
         'stock',
         'buying_price',
         'selling_price',
@@ -22,10 +23,20 @@ class Product extends Model
         'expire_date',
     ];
 
-    protected $with = ['category'];
+    protected $with = ['category', 'unit'];
 
     public function category(){
         return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class, 'unit_id');
+    }
+
+    public function stocks()
+    {
+        return $this->hasMany(Stock::class);
     }
 
     public function scopeFilter($query, array $filters)

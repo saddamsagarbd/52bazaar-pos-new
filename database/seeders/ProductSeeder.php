@@ -86,24 +86,30 @@ class ProductSeeder extends Seeder
             ],
         ];
 
-        foreach ($products as $product) {
-            Product::create([
-                'name' => $product['name'],
-                'slug' => Str::slug($product['name']),
-                'code' => IdGenerator::generate([
-                    'table' => 'products',
-                    'field' => 'code',
-                    'length' => 10,
-                    'prefix' => 'PRD-'
-                ]),
-                'category_id' => $product['category_id'],
-                'stock' => $product['stock'],
-                'buying_price' => $product['buying_price'],
-                'selling_price' => $product['selling_price'],
-                'buying_date' => now()->subDays(rand(1, 30)),
-                'expire_date' => now()->addYear(),
-                'image' => null,
-            ]);
+        $products = [];
+
+        if(!empty($products)){
+
+            foreach ($products as $product) {
+                Product::create([
+                    'name' => $product['name'],
+                    'slug' => Str::slug($product['name']),
+                    'code' => IdGenerator::generate([
+                        'table' => 'products',
+                        'field' => 'code',
+                        'length' => 10,
+                        'prefix' => 'PRD-'
+                    ]),
+                    'category_id' => $product['category_id'],
+                    'stock' => $product['stock'],
+                    'buying_price' => $product['buying_price'],
+                    'selling_price' => $product['selling_price'],
+                    'buying_date' => now()->subDays(rand(1, 30)),
+                    'expire_date' => now()->addYear(),
+                    'image' => null,
+                ]);
+            }
+
         }
     }
 }

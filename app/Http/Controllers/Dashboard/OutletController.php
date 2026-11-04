@@ -169,4 +169,17 @@ class OutletController extends Controller
 
         return Redirect::route('outlets.index')->with('success', 'Outlet has been closed!');
     }
+
+    public function search (Request $request) {
+        $search = $request->input('q');
+        $outlets = Outlet::when($search, function ($query, $search) {
+                        $query->where(function ($q) use ($search) {
+                            $q->where('name', 'LIKE', "%{$search}%")
+                            ->orWhere('code', 'LIKE', "%{$search}%");
+                        });
+                    })
+                    ->limit(10)
+                    ->get(['id', 'name']);
+        return response()->json($outlets);
+    }
 }

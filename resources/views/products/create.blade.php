@@ -61,7 +61,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="form-group col-md-6">
+                                <!-- <div class="form-group col-md-6">
                                     <label for="code">Product Code</label>
                                     <input type="text" class="form-control @error('code') is-invalid @enderror" id="code" name="code"
                                         value="{{ old('code') }}" placeholder="Leave empty for auto-generation" maxlength="50">
@@ -71,14 +71,14 @@
                                             {{ $message }}
                                         </div>
                                     @enderror
-                                </div>
+                                </div> -->
 
-                                <div class="form-group col-md-6">
+                                <!-- <div class="form-group col-md-6">
                                     <label for="barcode_scanner">Barcode Scanner</label>
                                     <input type="text" class="form-control" id="barcode_scanner" 
                                         placeholder="Scan barcode here (mobile-friendly)" autocomplete="off">
                                     <small class="form-text text-muted">Scan barcode to auto-fill Product Code</small>
-                                </div>
+                                </div> -->
 
                                 <div class="form-group col-md-6">
                                     <label for="category_id">Category <span class="text-danger">*</span></label>
@@ -97,6 +97,22 @@
                                 </div>
 
                                 <div class="form-group col-md-6">
+                                    <label for="unit_id">Unit <span class="text-danger">*</span></label>
+                                    <select class="form-control" name="unit_id" required>
+                                        <option selected="" disabled>-- Select Unit --</option>
+                                        @foreach ($units as $unit)
+                                            <option value="{{ $unit->id }}" {{ old('unit_id') == $unit->id ? 'selected' : '' }}>
+                                                {{ $unit->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('unit_id')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+
+                                <!-- <div class="form-group col-md-6">
                                     <label for="stock">Stock</label>
                                     <input type="number" class="form-control @error('stock') is-invalid @enderror" id="stock" name="stock"
                                         value="{{ old('stock') }}">
@@ -105,9 +121,9 @@
                                             {{ $message }}
                                         </div>
                                     @enderror
-                                    </div>
+                                </div> -->
 
-                                <div class="form-group col-md-6">
+                                <!-- <div class="form-group col-md-6">
                                     <label for="buying_price">Buying Price <span class="text-danger">*</span></label>
                                     <input type="number" class="form-control @error('buying_price') is-invalid @enderror" id="buying_price"
                                         name="buying_price" value="{{ old('buying_price') }}" required>
@@ -116,9 +132,9 @@
                                             {{ $message }}
                                         </div>
                                     @enderror
-                                    </div>
+                                </div> -->
 
-                                <div class="form-group col-md-6">
+                                <!-- <div class="form-group col-md-6">
                                     <label for="selling_price">Selling Price <span class="text-danger">*</span></label>
                                     <input type="number" class="form-control @error('selling_price') is-invalid @enderror" id="selling_price"
                                         name="selling_price" value="{{ old('selling_price') }}" required>
@@ -127,9 +143,9 @@
                                             {{ $message }}
                                         </div>
                                     @enderror
-                                </div>
+                                </div> -->
 
-                                <div class="form-group col-md-6">
+                                <!-- <div class="form-group col-md-6">
                                     <label for="buying_date">Buying Date</label>
                                     <input id="buying_date" class="form-control @error('buying_date') is-invalid @enderror" name="buying_date"
                                         value="{{ old('buying_date') }}" />
@@ -138,9 +154,9 @@
                                             {{ $message }}
                                         </div>
                                     @enderror
-                                </div>
+                                </div> -->
 
-                                <div class="form-group col-md-6">
+                                <!-- <div class="form-group col-md-6">
                                     <label for="expire_date">Expire Date</label>
                                     <input id="expire_date" class="form-control @error('expire_date') is-invalid @enderror" name="expire_date"
                                         value="{{ old('expire_date') }}" />
@@ -149,105 +165,105 @@
                                             {{ $message }}
                                         </div>
                                     @enderror
-                                </div>
-                            </div>
-                            <!-- end: Input Data -->
+                                </div> -->
+                        </div>
+                        <!-- end: Input Data -->
 
-                            <div class="mt-2">
-                                <button type="submit" class="btn btn-primary mr-2">
-                                    <x-heroicon-o-check-circle class="w-5 h-5 mr-1 inline" /> Save
-                                </button>
-                                <a class="btn btn-danger" href="{{ route('products.index') }}">
-                                    <x-heroicon-o-x-mark class="w-5 h-5 mr-1 inline" /> Cancel
-                                </a>
-                            </div>
-                                </form>
-                                </div>
-                                </div>
-                                </div>
-                                </div>
-                                <!-- Page end  -->
-                                </div>
+                        <div class="mt-2">
+                            <button type="submit" class="btn btn-primary mr-2">
+                                <x-heroicon-o-check-circle class="w-5 h-5 mr-1 inline" /> Save
+                            </button>
+                            <a class="btn btn-danger" href="{{ route('products.index') }}">
+                                <x-heroicon-o-x-mark class="w-5 h-5 mr-1 inline" /> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Page end  -->
+</div>
 
-    <script>
-        $('#buying_date').datepicker({
-            uiLibrary: 'bootstrap4',
-            format: 'yyyy-mm-dd'
-            // https://gijgo.com/datetimepicker/configuration/format
-        });
-        $('#expire_date').datepicker({
-            uiLibrary: 'bootstrap4',
-            format: 'yyyy-mm-dd'
-            // https://gijgo.com/datetimepicker/configuration/format
-        });
+<script>
+    $('#buying_date').datepicker({
+        uiLibrary: 'bootstrap4',
+        format: 'yyyy-mm-dd'
+        // https://gijgo.com/datetimepicker/configuration/format
+    });
+    $('#expire_date').datepicker({
+        uiLibrary: 'bootstrap4',
+        format: 'yyyy-mm-dd'
+        // https://gijgo.com/datetimepicker/configuration/format
+    });
 
-        // Barcode Scanner Handling
-        (function() {
-            const barcodeScanner = document.getElementById('barcode_scanner');
-            const codeField = document.getElementById('code');
+    // Barcode Scanner Handling
+    (function() {
+        const barcodeScanner = document.getElementById('barcode_scanner');
+        const codeField = document.getElementById('code');
+        
+        if (barcodeScanner && codeField) {
+            let scannerTimeout;
             
-            if (barcodeScanner && codeField) {
-                let scannerTimeout;
-                
-                // Auto-focus scanner field on mobile devices
-                function isMobileDevice() {
-                    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-                           (window.innerWidth <= 768);
-                }
-                
-                if (isMobileDevice()) {
-                    // Auto-focus scanner field on mobile after a short delay
-                    setTimeout(function() {
-                        barcodeScanner.focus();
-                    }, 300);
-                }
-                
-                // Handle scanner input (scanners typically send Enter after barcode)
-                barcodeScanner.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' || e.keyCode === 13) {
-                        e.preventDefault();
+            // Auto-focus scanner field on mobile devices
+            function isMobileDevice() {
+                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                        (window.innerWidth <= 768);
+            }
+            
+            if (isMobileDevice()) {
+                // Auto-focus scanner field on mobile after a short delay
+                setTimeout(function() {
+                    barcodeScanner.focus();
+                }, 300);
+            }
+            
+            // Handle scanner input (scanners typically send Enter after barcode)
+            barcodeScanner.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    e.preventDefault();
+                    
+                    const scannedValue = barcodeScanner.value.trim();
+                    if (scannedValue) {
+                        // Populate code field with scanned value
+                        codeField.value = scannedValue;
                         
-                        const scannedValue = barcodeScanner.value.trim();
-                        if (scannedValue) {
-                            // Populate code field with scanned value
-                            codeField.value = scannedValue;
-                            
-                            // Visual feedback
-                            codeField.classList.add('border-success');
+                        // Visual feedback
+                        codeField.classList.add('border-success');
+                        setTimeout(function() {
+                            codeField.classList.remove('border-success');
+                        }, 1000);
+                        
+                        // Clear scanner field
+                        barcodeScanner.value = '';
+                        
+                        // Re-focus scanner for next scan
+                        if (isMobileDevice()) {
                             setTimeout(function() {
-                                codeField.classList.remove('border-success');
-                            }, 1000);
-                            
-                            // Clear scanner field
-                            barcodeScanner.value = '';
-                            
-                            // Re-focus scanner for next scan
-                            if (isMobileDevice()) {
-                                setTimeout(function() {
-                                    barcodeScanner.focus();
-                                }, 100);
-                            }
+                                barcodeScanner.focus();
+                            }, 100);
                         }
                     }
-                });
-                
-                // Handle paste events (some scanners use paste)
-                barcodeScanner.addEventListener('paste', function(e) {
-                    setTimeout(function() {
-                        const pastedValue = barcodeScanner.value.trim();
-                        if (pastedValue) {
-                            codeField.value = pastedValue;
-                            codeField.classList.add('border-success');
-                            setTimeout(function() {
-                                codeField.classList.remove('border-success');
-                            }, 1000);
-                            barcodeScanner.value = '';
-                        }
-                    }, 10);
-                });
-            }
-        })();
-    </script>
+                }
+            });
+            
+            // Handle paste events (some scanners use paste)
+            barcodeScanner.addEventListener('paste', function(e) {
+                setTimeout(function() {
+                    const pastedValue = barcodeScanner.value.trim();
+                    if (pastedValue) {
+                        codeField.value = pastedValue;
+                        codeField.classList.add('border-success');
+                        setTimeout(function() {
+                            codeField.classList.remove('border-success');
+                        }, 1000);
+                        barcodeScanner.value = '';
+                    }
+                }, 10);
+            });
+        }
+    })();
+</script>
 
-    @include('components.preview-img-form')
+@include('components.preview-img-form')
 @endsection

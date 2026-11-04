@@ -39,22 +39,22 @@
                                         Import
                                     </button>
                                     <a class="btn btn-danger" href="{{ route('products.index') }}">Cancel</a>
-                                </div>
-                                </form>
-                                </div>
-                                </div>
-                                </div>
-                                </div>
-                                <!-- Page end  -->
-                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!-- Page end  -->
+    </div>
 
-                                <script>
-                                    /**
-                                     * Show the selected file name in the custom file input label.
-                                     */
-                                    function showFileName() {
-                                        const input = document.getElementById('upload_file');
-                                        const label_input = document.getElementById('label_input');
+    <script>
+        /**
+         * Show the selected file name in the custom file input label.
+         */
+        function showFileName() {
+            const input = document.getElementById('upload_file');
+            const label_input = document.getElementById('label_input');
 
             if (input.files && input.files.length > 0) {
                 label_input.innerHTML = input.files[0].name;

@@ -24,13 +24,14 @@ class StoreProductRequest extends FormRequest
         return [
             'image' => 'image|file|max:1024|nullable',
             'name' => 'required|string|unique:products,name',
-            'code' => 'nullable|string|unique:products,code|max:50',
+            // 'code' => 'nullable|string|unique:products,code|max:50',
             'category_id' => 'required|integer|exists:categories,id',
-            'stock' => 'required|integer',
-            'buying_price' => 'required|integer',
-            'selling_price' => 'required|integer',
-            'buying_date' => 'date_format:Y-m-d|nullable',
-            'expire_date' => 'date_format:Y-m-d|nullable',
+            'unit_id' => 'required|integer|exists:units,id',
+            // 'stock' => 'required|integer',
+            // 'buying_price' => 'required|integer',
+            // 'selling_price' => 'required|integer',
+            // 'buying_date' => 'date_format:Y-m-d|nullable',
+            // 'expire_date' => 'date_format:Y-m-d|nullable',
         ];
     }
 }

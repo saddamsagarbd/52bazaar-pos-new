@@ -80,7 +80,7 @@
                     <li>
                         <a href="#products" class="collapsed" data-toggle="collapse" aria-expanded="false">
                             <x-heroicon-o-archive-box class="w-6 h-6" />
-                            <span class="ml-3">Products</span>
+                            <span class="ml-3">Product Master</span>
                             <x-heroicon-o-chevron-right class="w-4 h-4 iq-arrow-right arrow-active" />
                         </a>
                         <ul id="products" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
@@ -101,6 +101,24 @@
                             </li>
                         </ul>
                     </li>
+                @endif
+
+                @if (auth()->user()->can('stock.menu'))
+                    <li>
+                        <a href="#stocks" class="collapsed" data-toggle="collapse" aria-expanded="false">
+                            <x-heroicon-o-archive-box class="w-6 h-6" />
+                            <span class="ml-3">Stock Manage</span>
+                            <x-heroicon-o-chevron-right class="w-4 h-4 iq-arrow-right arrow-active" />
+                        </a>
+                        <ul id="stocks" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
+                            <li class="{{ Request::is(['stocks']) ? 'active' : '' }}">
+                                <a href="{{ route('stocks.index') }}">
+                                    <x-heroicon-o-arrow-right class="w-4 h-4" /><span>Stocks</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
                 @endif
 
                 <hr>

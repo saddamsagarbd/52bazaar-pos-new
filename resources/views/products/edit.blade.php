@@ -29,10 +29,10 @@
                                             <img class="crm-profile-pic rounded-circle avatar-100" id="image-preview"
                                                 src="{{ $product->image ? asset('storage/products/' . $product->image) : asset('assets/images/product/default.webp') }}"
                                                 alt="profile-pic">
-                                            </div>
-                                            </div>
-                                            </div>
-                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
                             <div class="row">
                                 <div class="input-group mb-4 col-lg-6">
@@ -40,15 +40,15 @@
                                         <input type="file" class="custom-file-input @error('image') is-invalid @enderror" id="image" name="image"
                                             accept="image/*" onchange="previewImage();">
                                         <label class="custom-file-label" for="image">Choose file</label>
-                                        </div>
+                                    </div>
                                     @error('image')
                                         <div class="invalid-feedback">
                                             {{ $message }}
                                         </div>
                                     @enderror
-                                    </div>
-                                    </div>
-                                    <!-- end: Input Image -->
+                                </div>
+                            </div>
+                            <!-- end: Input Image -->
 
                             <!-- begin: Input Data -->
                             <div class="row align-items-center">
@@ -61,25 +61,6 @@
                                             {{ $message }}
                                         </div>
                                     @enderror
-                                    </div>
-
-                                <div class="form-group col-md-6">
-                                    <label for="code">Product Code</label>
-                                    <input type="text" class="form-control @error('code') is-invalid @enderror" id="code" name="code"
-                                        value="{{ old('code', $product->code) }}" maxlength="50">
-                                    <small class="form-text text-muted">Edit code or scan new barcode below</small>
-                                    @error('code')
-                                        <div class="invalid-feedback">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                </div>
-
-                                <div class="form-group col-md-6">
-                                    <label for="barcode_scanner">Barcode Scanner</label>
-                                    <input type="text" class="form-control" id="barcode_scanner" 
-                                        placeholder="Scan barcode here (mobile-friendly)" autocomplete="off">
-                                    <small class="form-text text-muted">Scan barcode to update Product Code</small>
                                 </div>
 
                                 <div class="form-group col-md-6">
@@ -100,54 +81,16 @@
                                 </div>
 
                                 <div class="form-group col-md-6">
-                                    <label for="stock">Stock</label>
-                                    <input type="number" class="form-control @error('stock') is-invalid @enderror" id="stock" name="stock"
-                                        value="{{ old('stock', $product->stock) }}">
-                                    @error('stock')
-                                        <div class="invalid-feedback">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                    </div>
-
-                                <div class="form-group col-md-6">
-                                    <label for="buying_price">Buying Price <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control @error('buying_price') is-invalid @enderror" id="buying_price"
-                                        name="buying_price" value="{{ old('buying_price', $product->buying_price) }}" required>
-                                    @error('buying_price')
-                                        <div class="invalid-feedback">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                    </div>
-
-                                <div class="form-group col-md-6">
-                                    <label for="selling_price">Selling Price <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control @error('selling_price') is-invalid @enderror" id="selling_price"
-                                        name="selling_price" value="{{ old('selling_price', $product->selling_price) }}" required>
-                                    @error('selling_price')
-                                        <div class="invalid-feedback">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                    </div>
-
-                                <div class="form-group col-md-6">
-                                    <label for="buying_date">Buying Date</label>
-                                    <input id="buying_date" class="form-control @error('buying_date') is-invalid @enderror" name="buying_date"
-                                        value="{{ old('buying_date', $product->buying_date) }}" />
-                                    @error('buying_date')
-                                        <div class="invalid-feedback">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                </div>
-
-                                <div class="form-group col-md-6">
-                                    <label for="expire_date">Expire Date</label>
-                                    <input id="expire_date" class="form-control @error('expire_date') is-invalid @enderror" name="expire_date"
-                                        value="{{ old('expire_date', $product->expire_date) }}" />
-                                    @error('expire_date')
+                                    <label for="unit_id">Unit <span class="text-danger">*</span></label>
+                                    <select class="form-control" name="unit_id" required>
+                                        <option selected="" disabled>-- Select Unit --</option>
+                                        @foreach ($units as $unit)
+                                            <option value="{{ $unit->id }}"
+                                                {{ old('unit_id', $product->unit_id) == $unit->id ? 'selected' : '' }}>{{ $unit->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('unit_id')
                                         <div class="invalid-feedback">
                                             {{ $message }}
                                         </div>
@@ -164,13 +107,13 @@
                                     <x-heroicon-o-x-mark class="w-5 h-5 mr-1 inline" /> Cancel
                                 </a>
                             </div>
-                                </form>
-                                </div>
-                                </div>
-                                </div>
-                                </div>
-                                <!-- Page end  -->
-                                </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Page end  -->
+    </div>
 
     <script>
         $('#buying_date').datepicker({
@@ -195,7 +138,7 @@
                 // Auto-focus scanner field on mobile devices
                 function isMobileDevice() {
                     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-                           (window.innerWidth <= 768);
+                        (window.innerWidth <= 768);
                 }
                 
                 if (isMobileDevice()) {

@@ -39,8 +39,14 @@ class CustomerSeeder extends Seeder
             ],
         ];
 
-        foreach ($customers as $customer) {
-            Customer::create($customer);
+        $customers = [];
+
+        if(!empty($customers)){
+
+            foreach ($customers as $customer) {
+                Customer::create($customer);
+            }
+
         }
     }
 }

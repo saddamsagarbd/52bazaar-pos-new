@@ -19,6 +19,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Haruncpi\LaravelIdGenerator\IdGenerator;
 use App\Http\Requests\Product\StoreProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
+use App\Models\Unit;
 
 class ProductController extends Controller
 {
@@ -41,11 +42,17 @@ class ProductController extends Controller
                     $query->join('categories', 'products.category_id', '=', 'categories.id')
                         ->orderBy('categories.name', $descending ? 'DESC' : 'ASC')
                         ->select('products.*');
+                }),
+                AllowedSort::callback('unit.name', function ($query, $descending) {
+                    $query->join('units', 'products.unit_id', '=', 'units.id')
+                        ->orderBy('units.name', $descending ? 'DESC' : 'ASC')
+                        ->select('products.*');
                 })
+                
             ])
             ->allowedFilters(['name'])
             ->filter(request(['search']))
-            ->with(['category'])
+            ->with(['category', 'unit'])
             ->paginate($row)
             ->appends(request()->query());
 
@@ -61,6 +68,7 @@ class ProductController extends Controller
     {
         return view('products.create', [
             'categories' => Category::all(),
+            'units' => Unit::all(),
         ]);
     }
 
@@ -76,8 +84,8 @@ class ProductController extends Controller
             $validatedData['code'] = IdGenerator::generate([
                 'table' => 'products',
                 'field' => 'code',
-                'length' => 4,
-                'prefix' => 'PC'
+                'length' => 10,
+                'prefix' => 'PRD-'
             ]);
         }
 
@@ -122,6 +130,7 @@ class ProductController extends Controller
     {
         return view('products.edit', [
             'categories' => Category::all(),
+            'units' => Unit::all(),
             'product' => $product
         ]);
     }
@@ -282,5 +291,27 @@ class ProductController extends Controller
         }
 
         $this->ExportExcel($product_array);
+    }
+
+    public function search (Request $request) {
+        $search = $request->input('q');
+
+        $products = Product::with(['unit', 'category'])
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('code', 'LIKE', "%{$search}%");
+                });
+            })
+            ->limit(10)
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name. ($product->unit ? " [".$product->unit->short_name."]" : ""),
+                ];
+            });
+
+        return response()->json($products);
     }
 }
