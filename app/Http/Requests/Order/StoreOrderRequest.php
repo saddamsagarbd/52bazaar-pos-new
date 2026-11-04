@@ -23,11 +23,13 @@ class StoreOrderRequest extends FormRequest
     {
         return [
             'customer_id' => 'required|exists:customers,id',
+            'outlet_id' => 'required|exists:outlets,id',
             'payment_type' => 'required|string',
             'pay_amount' => 'required|numeric|min:0',
-            'items' => 'required|array|min:1', // টেবিল থেকে পাঠানো প্রোডাক্ট লিস্ট
-            'items.*.id' => 'required|exists:products,id',
-            'items.*.qty' => 'required|numeric|min:1',
+            'items' => 'required|array|min:1',
+            'items.*.stock_id' => 'required|exists:stocks,id',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.qty' => 'required|numeric|min:0.1',
             'items.*.price' => 'required|numeric|min:0',
         ];
     }

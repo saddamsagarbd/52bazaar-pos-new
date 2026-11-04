@@ -11,12 +11,13 @@ class Order extends Model
 
     protected $fillable = [
         'customer_id',
+        'outlet_id',
         'order_date',
         'order_status',
         'total_products',
         'sub_total',
-        'vat',
         'discount',
+        'vat',
         'invoice_no',
         'total',
         'payment_type',
@@ -27,6 +28,7 @@ class Order extends Model
     protected $casts = [
         'order_date' => 'datetime',
         'sub_total' => 'float',
+        'discount' => 'float',
         'vat' => 'float',
         'total' => 'float',
         'pay_amount' => 'float',
@@ -36,6 +38,11 @@ class Order extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function outlet()
+    {
+        return $this->belongsTo(Outlet::class, 'outlet_id');
     }
 
     public function details()

@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderDetails;
+use App\Models\Outlet;
+use App\Models\Stock;
 use Illuminate\Support\Facades\Redirect;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -31,6 +33,7 @@ class PosController extends Controller
         return view('pos.index', [
             'categories' => Category::orderBy('name')->get(),
             'productItem' => Cart::content(),
+            'outlets' => Outlet::where('status', 1)->get(),
             'products' => QueryBuilder::for(Product::class)
                 ->where('expire_date', '>', $todayDate)
                 ->allowedSorts(['name', 'selling_price'])
@@ -167,29 +170,20 @@ class PosController extends Controller
 
     public function searchProducts(Request $request)
     {
-        $term = $request->term;
-        $query = Product::query();
+        $outletId = $request->get('outlet_id');
+        $term = $request->get('term');
 
-        if ($term) {
-            $query->where('name', 'LIKE', "%{$term}%")
-                ->orWhere('slug', 'LIKE', "%{$term}%")
-                ->orWhere('code', 'LIKE', "%{$term}%");
-        }
-
-        $products = $query->latest()->get()->map(function ($product) {
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'code' => $product->code ?? 'N/A',
-                'selling_price' => $product->selling_price ?? 0,
-                'stock' => $product->stock ?? 0,
-                'text' => $product->name . ' (' . ($product->code ?? 'N/A') . ')'
-            ];
-        });
+        $stocks = Stock::with('product')
+            ->where('outlet_id', $outletId)
+            ->whereHas('product', function($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%")
+                ->orWhere('code', 'like', "%{$term}%");
+            })
+            ->get();
 
         return response()->json([
-            'products' => $products, 
-            'results' => $products
+            'stocks' => $stocks, 
+            'results' => $stocks
         ]);
     }
 

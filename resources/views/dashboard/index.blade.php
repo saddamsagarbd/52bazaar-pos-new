@@ -34,80 +34,31 @@
                 </div>
             </div>
 
-            <!-- Metric Cards -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card card-block card-stretch card-height">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-4 card-total-sale">
-                            <div class="icon iq-icon-box-2 bg-info-light">
-                                <x-heroicon-o-banknotes class="w-6 h-6 text-info" />
-                            </div>
-                            <div>
-                                <p class="mb-2">Total Paid</p>
-                                <h4>${{ number_format($total_paid, 2) }}</h4>
-                            </div>
-                        </div>
-                        <div class="iq-progress-bar mt-2">
-                            <span class="bg-info iq-progress progress-1" data-percent="85" style="width: 85%;"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-                <div class="card card-block card-stretch card-height">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-4 card-total-sale">
-                            <div class="icon iq-icon-box-2 bg-danger-light">
-                                <x-heroicon-o-credit-card class="w-6 h-6 text-danger" />
-                            </div>
-                            <div>
-                                <p class="mb-2">Total Due</p>
-                                <h4>${{ number_format($total_due, 2) }}</h4>
+            <!-- Outlet-wise Payment & Due Cards -->
+            <div class="col-lg-12 mb-4">
+                <h4 class="font-weight-bold mb-3">Outlet-wise Collection & Due</h4>
+                <div class="row">
+                    @forelse($outlet_stats as $outlet)
+                        <div class="col-lg-4 col-md-6 mb-3">
+                            <div class="card card-block card-stretch card-height border-primary shadow-sm">
+                                <div class="card-body">
+                                    <h5 class="font-weight-bold text-primary mb-3">{{ $outlet->name }}</h5>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-muted font-weight-bold">Collection (Paid):</span>
+                                        <span class="h6 font-weight-bold text-success mb-0">BDT {{ number_format($outlet->total_paid ?? 0, 2) }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted font-weight-bold">Total Due:</span>
+                                        <span class="h6 font-weight-bold text-danger mb-0">BDT {{ number_format($outlet->total_due ?? 0, 2) }}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="iq-progress-bar mt-2">
-                            <span class="bg-danger iq-progress progress-1" data-percent="40" style="width: 40%;"></span>
+                    @empty
+                        <div class="col-12">
+                            <p class="text-center text-muted">No outlets found.</p>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-                <div class="card card-block card-stretch card-height">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-4 card-total-sale">
-                            <div class="icon iq-icon-box-2 bg-success-light">
-                                <x-heroicon-o-check-circle class="w-6 h-6 text-success" />
-                            </div>
-                            <div>
-                                <p class="mb-2">Complete Orders</p>
-                                <h4>{{ $complete_orders }}</h4>
-                            </div>
-                        </div>
-                        <div class="iq-progress-bar mt-2">
-                            <span class="bg-success iq-progress progress-1" data-percent="75" style="width: 75%;"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-                <div class="card card-block card-stretch card-height">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-4 card-total-sale">
-                            <div class="icon iq-icon-box-2 bg-warning-light">
-                                <x-heroicon-o-clock class="w-6 h-6 text-warning" />
-                            </div>
-                            <div>
-                                <p class="mb-2">Pending Orders</p>
-                                <h4>{{ $pending_orders }}</h4>
-                            </div>
-                        </div>
-                        <div class="iq-progress-bar mt-2">
-                            <span class="bg-warning iq-progress progress-1" data-percent="25" style="width: 25%;"></span>
-                        </div>
-                    </div>
+                    @endforelse
                 </div>
             </div>
 

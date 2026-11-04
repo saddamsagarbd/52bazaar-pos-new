@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Redirect;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Haruncpi\LaravelIdGenerator\IdGenerator;
 use App\Http\Requests\Order\StoreOrderRequest;
+use App\Models\Stock;
+use App\Models\StockBatch;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -40,7 +43,7 @@ class OrderController extends Controller
                         ->select('orders.*');
                 })
             ])
-            ->with('customer')
+            ->with(['customer', 'outlet'])
             ->paginate($row);
 
         return view('orders.pending-orders', [
@@ -85,67 +88,9 @@ class OrderController extends Controller
      */
     public function storeOrder(StoreOrderRequest $request)
     {
-        // Validation handled by StoreOrderRequest
+        DB::beginTransaction();
 
-        // return DB::transaction(function () use ($request) {
-        //     $invoice_no = IdGenerator::generate([
-        //         'table' => 'orders',
-        //         'field' => 'invoice_no',
-        //         'length' => 10,
-        //         'prefix' => 'INV-'
-        //     ]);
-
-        //     $total        = (float) Cart::total(null, null, ''); // Get float value
-        //     $pay_amount   = $request->pay_amount;
-        //     $discount     = (float) $request->discount;
-        //     $net_payable  = $total - $discount;
-        //     $due_amount   = $net_payable - $pay_amount;
-
-        //     $order = Order::create([
-        //         'customer_id' => $request->customer_id,
-        //         'invoice_no' => $invoice_no,
-        //         'order_date' => Carbon::now(),
-        //         'order_status' => 'pending',
-        //         'total_products' => Cart::count(),
-        //         'sub_total' => (float) Cart::subtotal(null, null, ''),
-        //         'discount' => (float) $request->discount,
-        //         'vat' => (float) Cart::tax(null, null, ''),
-        //         'total' => (float) $net_payable,
-        //         'payment_type' => $request->payment_type,
-        //         'pay_amount' => $pay_amount,
-        //         'due_amount' => $due_amount,
-        //     ]);
-
-        //     // Create Order Details
-        //     $contents = Cart::content();
-        //     foreach ($contents as $content) {
-        //         OrderDetails::create([
-        //             'order_id' => $order->id,
-        //             'product_id' => $content->id,
-        //             'quantity' => $content->qty,
-        //             'unit_price' => $content->price,
-        //             'total' => $content->total,
-        //         ]);
-        //     }
-
-        //     // Clear Cart
-        //     Cart::destroy();
-
-        //     if ($request->wantsJson()) {
-        //         // Return success with Invoice URL and Cleared Cart HTML
-        //         return response()->json([
-        //             'success' => true,
-        //             'message' => 'Order created successfully!',
-        //             'invoice_url' => route('order.invoiceDownload', $order->id),
-        //             'cart_html' => view('pos.cart-sidebar', ['productItem' => Cart::content()])->render(),
-        //             'cart_count' => Cart::count(),
-        //         ]);
-        //     }
-
-        //     return Redirect::route('order.invoiceDownload', $order->id)->with('success', 'Order has been created!');
-        // });
-
-        return DB::transaction(function () use ($request) {
+        try {
             $invoice_no = IdGenerator::generate([
                 'table' => 'orders',
                 'field' => 'invoice_no',
@@ -154,29 +99,31 @@ class OrderController extends Controller
             ]);
 
             $items = $request->input('items', []);
+            $outletId = $request->input('outlet_id'); // Frontend theke outlet_id asbe
             
-            // ২. সাবটোটাল, ডিসকাউন্ট এবং নেট অ্যামাউন্ট হিসাব করা
+            // সাবটোটাল, ডিসকাউন্ট এবং নেট অ্যামাউন্ট হিসাব করা
             $sub_total = 0;
             foreach ($items as $item) {
                 $sub_total += $item['price'] * $item['qty'];
             }
 
             $discount = (float) $request->input('discount', 0);
-            $vat = 0; // যদি ভ্যাট থাকে এখানে যোগ করতে পারেন
+            $vat = 0; 
             $net_payable = ($sub_total - $discount) + $vat;
             
             $pay_amount = (float) $request->input('pay_amount', 0);
             $due_amount = $net_payable - $pay_amount;
             if ($due_amount < 0) {
-                $due_amount = 0; // অ্যাডভান্স পেমেন্ট হলে ডিউ জিরো বা নেগেটিভ রাখতে পারেন
+                $due_amount = 0;
             }
 
-            // ৩. Order Master Table-এ ডেটা সেভ করা
+            // 3. Order Master Table-এ ডেটা সেভ করা (Status: pending)
             $order = Order::create([
                 'customer_id' => $request->customer_id,
+                'outlet_id' => $outletId, // Order-er sathe outlet map rakha bhalo
                 'invoice_no' => $invoice_no,
                 'order_date' => Carbon::now(),
-                'order_status' => 'completed', // অথবা pending
+                'order_status' => 'pending', // Order pending rakha hocche
                 'total_products' => count($items),
                 'sub_total' => $sub_total,
                 'discount' => $discount,
@@ -188,38 +135,64 @@ class OrderController extends Controller
                 'due_amount' => $due_amount,
             ]);
 
-            // ৪. Table-এর প্রতিটি item থেকে Order Details বা আইটেমগুলো সেভ করা
+            // 4. Order Details save kora & Stocks-er booking_qty update kora
             foreach ($items as $item) {
                 $unitPrice = (float) $item['price'];
                 $quantity = (float) $item['qty'];
                 
                 OrderDetails::create([
-                    'order_id' => $order->id,
-                    'product_id' => $item['id'],
-                    'quantity' => $quantity,
-                    'unit_price' => $unitPrice,
-                    'total' => $unitPrice * $quantity,
+                    'order_id'    => $order->id,
+                    'product_id'  => $item['product_id'],
+                    'stock_id'    => $item['stock_id'],
+                    'quantity'    => $quantity,
+                    'unit_price'  => $unitPrice,
+                    'total'       => $unitPrice * $quantity,
                 ]);
 
-                // (ঐচ্ছিক) প্রোডাক্ট স্টক আপডেট বা কমানোর কোড এখানে দিতে পারেন
-                // $product = Product::find($item['id']);
-                // if($product) {
-                //     $product->stock -= $quantity;
-                //     $product->save();
-                // }
+                // Main stocks table theke booking_qty barie dewa (Reserved for pending order)
+                $stock = Stock::where('product_id', $item['product_id'])
+                            ->where('outlet_id', $outletId)
+                            ->first();
+
+                if ($stock) {
+                    // Check if available stock (quantity - booking_qty) is sufficient
+                    $availableStock = $stock->quantity - $stock->booking_qty;
+                    if ($quantity > $availableStock) {
+                        throw new \Exception("Stock is insufficient for product ID: {$item['product_id']}");
+                    }
+
+                    // Increment booking qty
+                    $stock->increment('booking_qty', $quantity);
+                } else {
+                    throw new \Exception("Stock record not found for product ID: {$item['product_id']}");
+                }
             }
 
-            // ৫. JSON Response রিটার্ন করা (AJAX Checkout এর জন্য)
+            DB::commit();
+
             if ($request->wantsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Order created successfully!',
+                    'message' => 'Order created successfully as Pending!',
                     'invoice_url' => route('order.invoiceDownload', $order->id),
                 ]);
             }
 
-            return Redirect::route('order.invoiceDownload', $order->id)->with('success', 'Order has been created!');
-        });
+            return Redirect::route('order.invoiceDownload', $order->id)->with('success', 'Order has been created as Pending!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Order Store Error: ' . $e->getMessage());
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ], 422);
+            }
+
+            return redirect()->back()->withInput()->with('error', 'Error: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -244,20 +217,85 @@ class OrderController extends Controller
      */
     public function updateStatus(Request $request)
     {
+
         $order_id = $request->id;
 
-        DB::transaction(function () use ($order_id) {
-            $products = OrderDetails::where('order_id', $order_id)->get();
+        DB::beginTransaction();
 
-            foreach ($products as $detail) {
-                Product::where('id', $detail->product_id)
-                    ->decrement('stock', $detail->quantity);
+        try {
+            // 1. Order ebong tar details (sathe outlet_id jate thake) fetch kora
+            $order = Order::with('details')->findOrFail($order_id);
+
+            // Jodi order already complete ba cancel thake
+            if ($order->order_status !== 'pending') {
+                throw new \Exception("This order has already been processed or completed!");
             }
 
-            Order::findOrFail($order_id)->update(['order_status' => 'complete']);
-        });
+            foreach ($order->details as $detail) {
+                $qtyToReduce = (float) $detail->quantity;
 
-        return Redirect::route('order.pendingOrders')->with('success', 'Order has been completed!');
+                // 2. Main stock table theke booking_qty release kora ebong actual quantity minus kora
+                $stock = Stock::where('product_id', $detail->product_id)
+                            ->where('outlet_id', $order->outlet_id)
+                            ->first();
+
+                if (!$stock) {
+                    throw new \Exception("Stock record not found for product ID: {$detail->product_id} in this outlet.");
+                }
+
+                // Check if booking quantity is sufficient or decrease safely
+                if ($stock->booking_qty < $qtyToReduce) {
+                    // Fallback safety if booking wasn't recorded properly, but normally it should match
+                    Log::warning("Booking qty mismatch for product ID: {$detail->product_id} in outlet ID: {$order->outlet_id}");
+                }
+
+                // Booking qty release and actual stock reduce
+                $stock->decrement('booking_qty', $qtyToReduce);
+                $stock->decrement('quantity', $qtyToReduce);
+
+                // 3. FIFO (First In, First Out) Batch Deduction from stock_batch table
+                $batches = StockBatch::where('stock_id', $stock->id)
+                                    ->where('remain_qty', '>', 0)
+                                    ->orderBy('created_at', 'ASC') // Purono batch age sesh hobe
+                                    ->get();
+
+                $remainingQtyToDeduced = $qtyToReduce;
+
+                foreach ($batches as $batch) {
+                    if ($remainingQtyToDeduced <= 0) break;
+
+                    if ($batch->remain_qty >= $remainingQtyToDeduced) {
+                        $batch->decrement('remain_qty', $remainingQtyToDeduced);
+                        $remainingQtyToDeduced = 0;
+                    } else {
+                        $remainingQtyToDeduced -= $batch->remain_qty;
+                        $batch->update(['remain_qty' => 0]);
+                    }
+                }
+
+                // Jodi batch-er total quantity stock-er cheye kom thake ebong unfulfilled thake
+                if ($remainingQtyToDeduced > 0) {
+                    Log::warning("Batch remain quantity was insufficient for product ID: {$detail->product_id}. Unfulfilled qty: {$remainingQtyToDeduced}");
+                }
+            }
+
+            // 4. Order status complete update kora
+            $order->update(['order_status' => 'complete']);
+
+            // Sob thik thakle commit
+            DB::commit();
+
+            return Redirect::route('order.pendingOrders')->with('success', 'Order has been completed and inventory adjusted successfully!');
+
+        } catch (\Exception $e) {
+            // Kono error hole rollback kore dibe
+            DB::rollBack();
+
+            // Error log record rakha
+            Log::error('Order Completion Error (ID: ' . $order_id . '): ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Failed to complete order! Error: ' . $e->getMessage());
+        }
     }
 
     public function invoiceDownload(int $order_id)

@@ -17,4 +17,9 @@ class Outlet extends Model
     {
         return $this->hasMany(Stock::class);
     }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'outlet_id', 'id');
+    }
 }

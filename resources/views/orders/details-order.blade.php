@@ -32,20 +32,20 @@
                                 <div class="form-group">
                                     <label>Customer Name</label>
                                     <input type="text" class="form-control bg-white" value="{{ $order->customer->name }}" readonly>
-                                    </div>
-                                    </div>
+                                </div>
+                            </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Customer Phone</label>
                                     <input type="text" class="form-control bg-white" value="{{ $order->customer->phone }}" readonly>
-                                    </div>
-                                    </div>
+                                </div>
+                            </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Order Date</label>
                                     <input type="text" class="form-control bg-white" value="{{ $order->order_date->format('Y-m-d') }}" readonly>
-                                    </div>
-                                    </div>
+                                </div>
+                            </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Order Invoice</label>
@@ -66,9 +66,9 @@
                                                     <span class="input-group-text">$</span>
                                                 </div>
                                         <input type="text" class="form-control bg-white" value="{{ number_format($order->pay_amount, 2) }}" readonly>
-                                        </div>
-                                        </div>
-                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Due Amount</label>
@@ -77,10 +77,10 @@
                                                         <span class="input-group-text">$</span>
                                                     </div>
                                         <input type="text" class="form-control bg-white" value="{{ number_format($order->due_amount, 2) }}" readonly>
-                                        </div>
-                                        </div>
-                                        </div>
-                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Actions for Pending Orders -->
                         @if ($order->order_status == 'pending')
@@ -111,9 +111,9 @@
                                 </div>
                             </div>
                         @endif
-                        </div>
-                        </div>
-                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Order Items Table -->
             <div class="col-lg-12">
@@ -156,6 +156,10 @@
                                     <tr>
                                         <td colspan="6" class="text-right font-weight-bold">Subtotal</td>
                                         <td class="font-weight-bold">{{ number_format($order->sub_total, 2) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="6" class="text-right font-weight-bold">Discount</td>
+                                        <td class="font-weight-bold">{{ number_format($order->discount, 2) }}</td>
                                     </tr>
                                     <tr>
                                         <td colspan="6" class="text-right font-weight-bold">VAT</td>

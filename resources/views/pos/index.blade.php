@@ -30,31 +30,42 @@
                 </div>
 
                 <div class="card-body p-4">
-                    <!-- TOP BAR: Search & Customer Selection -->
+                    <!-- TOP BAR: Outlet Selection, Search & Customer -->
                     <div class="row mb-4">
-                        <!-- Search & Barcode Scan Input -->
-                        <div class="col-md-7">
-                            <label class="font-weight-bold text-dark mb-2">Scan Barcode / Search Product (Name/SKU/Code)</label>
+                        <!-- Outlet Selection -->
+                        <div class="col-md-4">
+                            <label class="font-weight-bold text-dark mb-2">Select Outlet <span class="text-danger">*</span></label>
+                            <select class="form-control select2" id="outlet_id" name="outlet_id" style="width: 100%;" onchange="onOutletChange()">
+                                <option value="" selected disabled>-- Select Outlet --</option>
+                                @foreach($outlets ?? [] as $outlet)
+                                    <option value="{{ $outlet->id }}">{{ $outlet->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Search & Barcode Scan Input (Stock-based) -->
+                        <div class="col-md-4">
+                            <label class="font-weight-bold text-dark mb-2">Search Product (from Stock)</label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text bg-primary text-white">
                                         <x-heroicon-o-magnifying-glass class="w-5 h-5" />
                                     </span>
                                 </div>
-                                <input type="text" id="pos_product_search" class="form-control form-control-lg border-primary" 
-                                    placeholder="Scan barcode or type product name/SKU..." autofocus autocomplete="off">
+                                <input type="text" id="pos_product_search" class="form-control border-primary" 
+                                    placeholder="Type product name/code..." autocomplete="off" disabled>
                             </div>
                             <div id="search_results_dropdown" class="dropdown-menu w-100 shadow-lg" style="max-height: 300px; overflow-y: auto;"></div>
                         </div>
 
                         <!-- Customer Selection -->
-                        <div class="col-md-5">
+                        <div class="col-md-4">
                             <label class="font-weight-bold text-dark mb-2">Customer</label>
                             <div class="input-group">
-                                <select class="form-control select2" id="customer_id" name="customer_id" style="width: 80%;">
-                                    <option value="" selected disabled>-- Search / Select Customer --</option>
+                                <select class="form-control select2" id="customer_id" name="customer_id" style="width: 75%;">
+                                    <option value="" selected disabled>-- Search Customer --</option>
                                 </select>
-                                <div class="input-group-append" style="width: 20%;">
+                                <div class="input-group-append" style="width: 25%;">
                                     <button type="button" class="btn btn-outline-primary btn-block" title="Add Customer" data-toggle="modal" data-target="#addCustomerModal">
                                         <x-heroicon-o-plus class="w-5 h-5 mx-auto" />
                                     </button>
@@ -69,18 +80,19 @@
                             <thead class="bg-light text-dark font-weight-bold">
                                 <tr>
                                     <th style="width: 5%;">#</th>
-                                    <th style="width: 30%;" class="text-left">Product Name</th>
+                                    <th style="width: 25%;" class="text-left">Product Name</th>
+                                    <th style="width: 15%;">Batch / Available</th>
                                     <th style="width: 15%;">Unit Price</th>
                                     <th style="width: 15%;">Quantity</th>
-                                    <th style="width: 20%;">Sub Total</th>
+                                    <th style="width: 15%;">Sub Total</th>
                                     <th style="width: 10%;">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="pos-table-body">
                                 <tr id="empty-cart-row">
-                                    <td colspan="6" class="text-center py-5 text-muted">
+                                    <td colspan="7" class="text-center py-5 text-muted">
                                         <x-heroicon-o-shopping-bag class="w-12 h-12 mx-auto text-secondary mb-2" />
-                                        <p class="mb-0 font-weight-bold">No products appended yet. Scan or search to add items.</p>
+                                        <p class="mb-0 font-weight-bold">Please select an outlet and search products to add items.</p>
                                     </td>
                                 </tr>
                             </tbody>
@@ -132,12 +144,12 @@
                                         <input type="radio" name="payment_type" id="pay_card" value="Card" onchange="togglePaymentFields()"> Card
                                     </label>
                                     <label class="btn btn-outline-primary">
-                                        <input type="radio" name="payment_type" id="pay_mfs" value="MFS" onchange="togglePaymentFields()"> Mobile Banking (bKash/Nagad)
+                                        <input type="radio" name="payment_type" id="pay_mfs" value="MFS" onchange="togglePaymentFields()"> MFS (bKash/Nagad)
                                     </label>
                                 </div>
                             </div>
 
-                            <!-- Payment Details Extra Field (Card/MFS Info) -->
+                            <!-- Payment Reference -->
                             <div class="form-group mb-3" id="payment_reference_group" style="display: none;">
                                 <label class="font-weight-bold text-dark" id="payment_ref_label">Transaction / Reference No.</label>
                                 <input type="text" id="payment_reference" class="form-control" placeholder="Enter Transaction ID or Card Approval Code">
@@ -208,17 +220,17 @@
 @endsection
 
 @section('specificpagescripts')
-<!-- Select2 -->
+<!-- Select2 CSS & JS -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
     let posCart = [];
 
-    // Select2 Initialization
     window.addEventListener('load', function () {
-        $('.select2').select2({
-            placeholder: "-- Search / Select Customer --",
+        // Initialize Customer Select2
+        $('#customer_id').select2({
+            placeholder: "-- Search Customer --",
             allowClear: true,
             ajax: {
                 url: "{{ route('pos.customers.search') }}",
@@ -229,22 +241,50 @@
                 cache: true
             }
         });
+
+        // Initialize Outlet Select2
+        $('#outlet_id').select2();
     });
 
-    // 1. Live Search Input & Barcode Scanning Logic
+    // When Outlet changes, enable product search input and clear cart if outlet changes
+    function onOutletChange() {
+        let outletId = document.getElementById('outlet_id').value;
+        let searchInput = document.getElementById('pos_product_search');
+        
+        if (outletId) {
+            searchInput.disabled = false;
+            searchInput.focus();
+        } else {
+            searchInput.disabled = true;
+        }
+        
+        // Clear cart when switching outlets to prevent mixed outlet items
+        posCart = [];
+        renderTable();
+    }
+
+    // Live Search Input for Products from Stocks based on selected Outlet
     const searchInput = document.getElementById('pos_product_search');
     let searchTimeout = null;
 
     searchInput.addEventListener('input', function() {
         clearTimeout(searchTimeout);
-        const query = this.value.trim();
+        let query = this.value.trim();
+        let outletId = document.getElementById('outlet_id').value;
+
+        if (!outletId) {
+            alert('Please select an outlet first!');
+            this.value = '';
+            return;
+        }
+
         if (query.length < 2) {
             document.getElementById('search_results_dropdown').style.display = 'none';
             return;
         }
 
         searchTimeout = setTimeout(() => {
-            fetch(`{{ route('pos.product.search') }}`, {
+            fetch(`{{ route('pos.product.search') }}?outlet_id=${outletId}&term=${query}`, {
                 headers: { 'Accept': 'application/json' }
             })
             .then(res => res.json())
@@ -252,28 +292,20 @@
                 let dropdown = document.getElementById('search_results_dropdown');
                 dropdown.innerHTML = '';
                 
-                if (data.products && data.products.length > 0) {
-                    // Exact Barcode Auto Match
-                    if (data.products.length === 1 && data.products[0].code === query) {
-                        appendProductToTable(data.products[0]);
-                        searchInput.value = '';
-                        dropdown.style.display = 'none';
-                        return;
-                    }
-
-                    data.products.forEach(prod => {
-                        console.log(prod);
+                if (data.stocks && data.stocks.length > 0) {
+                    data.stocks.forEach(stock => {
+                        const remainQty = parseFloat(stock.quantity) - parseFloat(stock.booking_qty)
                         let item = document.createElement('a');
                         item.className = 'dropdown-item d-flex justify-content-between align-items-center py-2 border-bottom';
                         item.href = 'javascript:void(0)';
                         item.innerHTML = `
                             <div>
-                                <strong>${prod.name}</strong> <small class="text-muted">(${prod.code || 'N/A'})</small>
+                                <strong>${stock.product.name}</strong> <small class="text-muted">(${stock.product.code || 'N/A'})</small>
                             </div>
-                            <span class="badge badge-primary">৳${prod.selling_price} | Stock: ${prod.stock}</span>
+                            <span class="badge badge-primary">৳${stock.selling_rate} | Stock: ${remainQty}</span>
                         `;
                         item.onclick = function() {
-                            appendProductToTable(prod);
+                            appendProductToTable(stock);
                             searchInput.value = '';
                             dropdown.style.display = 'none';
                         };
@@ -287,26 +319,32 @@
         }, 300);
     });
 
-    // 2. Append Product to Cart Table
-    function appendProductToTable(product) {
-        let existing = posCart.find(item => item.id === product.id);
+    // Append Stock Item to Cart Table
+    function appendProductToTable(stock) {
+        let existing = posCart.find(item => item.stock_id === stock.id);
 
         if (existing) {
-            existing.qty += 1;
-            existing.subtotal = existing.qty * existing.price;
+            if (existing.qty < stock.quantity) {
+                existing.qty += 1;
+                existing.subtotal = existing.qty * existing.price;
+            } else {
+                alert('Requested quantity exceeds available stock!');
+            }
         } else {
             posCart.push({
-                id: product.id,
-                name: product.name,
-                price: parseFloat(product.selling_price) || 0,
+                stock_id: stock.id,
+                product_id: stock.product_id,
+                name: stock.product.name,
+                price: parseFloat(stock.selling_rate) || 0,
                 qty: 1,
-                subtotal: parseFloat(product.selling_price) || 0
+                max_qty: parseFloat(stock.quantity) || 0,
+                subtotal: parseFloat(stock.selling_rate) || 0
             });
         }
         renderTable();
     }
 
-    // 3. Render Table DOM
+    // Render Table DOM
     function renderTable() {
         const tbody = document.getElementById('pos-table-body');
         tbody.innerHTML = '';
@@ -314,9 +352,9 @@
         if (posCart.length === 0) {
             tbody.innerHTML = `
                 <tr id="empty-cart-row">
-                    <td colspan="6" class="text-center py-5 text-muted">
+                    <td colspan="7" class="text-center py-5 text-muted">
                         <x-heroicon-o-shopping-bag class="w-12 h-12 mx-auto text-secondary mb-2" />
-                        <p class="mb-0 font-weight-bold">No products appended yet. Scan or search to add items.</p>
+                        <p class="mb-0 font-weight-bold">No products added yet. Select outlet and search items.</p>
                     </td>
                 </tr>`;
             document.getElementById('cart-item-count').innerText = '0 Items';
@@ -328,18 +366,22 @@
             let tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${index + 1}</td>
-                <td class="text-left font-weight-bold text-dark">${item.name}</td>
+                <td class="text-left font-weight-bold text-dark">
+                    ${item.name}
+                    <input type="hidden" value="${item.price.toFixed(2)}">
+                </td>
+                <td><span class="badge badge-info">Avail: ${item.max_qty}</span></td>
                 <td>
-                    <input type="number" readonly class="form-control form-control-sm text-center" 
+                    <input type="text" readonly class="form-control form-control-sm text-center" 
                         value="${item.price.toFixed(2)}" oninput="updateItemPrice(${index}, this.value)">
                 </td>
                 <td>
-                    <input type="number" min="1" class="form-control form-control-sm text-center" 
+                    <input type="number" step="0.01" min="0.1" max="${item.max_qty}" class="form-control form-control-sm text-center item-qty-input" 
                         value="${item.qty}" oninput="updateItemQty(${index}, this.value)">
                 </td>
                 <td>
-                    <input type="number" step="0.01" class="form-control form-control-sm text-center font-weight-bold text-primary" 
-                        value="${item.subtotal.toFixed(2)}" onchange="updateItemSubtotal(${index}, this.value)">
+                    <input type="number" step="0.01" min="0" class="form-control form-control-sm text-center font-weight-bold text-primary item-subtotal-input" 
+                        value="${item.subtotal.toFixed(2)}" oninput="updateItemSubtotal(${index}, this.value)">
                 </td>
                 <td>
                     <button class="btn btn-outline-danger btn-sm rounded-circle" onclick="removeItem(${index})">
@@ -354,7 +396,6 @@
         recalculateTotals();
     }
 
-    // Two-Way Interactive Calculations
     function updateItemPrice(index, val) {
         let price = parseFloat(val) || 0;
         posCart[index].price = price;
@@ -362,20 +403,61 @@
         renderTable();
     }
 
+    // 1. Quantity change korle Subtotal update hobe
     function updateItemQty(index, val) {
-        let qty = parseFloat(val) || 1;
+        let qty = parseFloat(val) || 0;
+        
+        // Max stock validation check
+        if (qty > posCart[index].max_qty) {
+            alert('Quantity cannot exceed available stock!');
+            qty = posCart[index].max_qty;
+            // input field-er value force kore max kore dewa
+            event.target.value = qty;
+        }
+
         posCart[index].qty = qty;
-        posCart[index].subtotal = posCart[index].price * qty;
-        renderTable();
+        posCart[index].subtotal = qty * posCart[index].price;
+        
+        // Update only the subtotal input field of this specific row without re-rendering the whole table
+        const row = document.getElementById('pos-table-body').children[index];
+        if (row) {
+            const subtotalInput = row.querySelector('.item-subtotal-input');
+            if (subtotalInput) {
+                subtotalInput.value = posCart[index].subtotal.toFixed(2);
+            }
+        }
+
+        recalculateTotals();
     }
 
+    // 2. Subtotal change (Vice-versa sync without full re-render)
     function updateItemSubtotal(index, val) {
         let subtotal = parseFloat(val) || 0;
         posCart[index].subtotal = subtotal;
+
         if (posCart[index].price > 0) {
-            posCart[index].qty = (subtotal / posCart[index].price).toFixed(2);
+            let calculatedQty = subtotal / posCart[index].price;
+
+            if (calculatedQty > posCart[index].max_qty) {
+                alert('Calculated quantity exceeds available stock!');
+                calculatedQty = posCart[index].max_qty;
+                posCart[index].subtotal = calculatedQty * posCart[index].price;
+                event.target.value = posCart[index].subtotal.toFixed(2);
+            }
+
+            posCart[index].qty = parseFloat(calculatedQty.toFixed(2));
+            
+            // Update only the quantity input field of this specific row
+            const row = document.getElementById('pos-table-body').children[index];
+            if (row) {
+                const qtyInput = row.querySelector('.item-qty-input');
+                if (qtyInput) {
+                    qtyInput.value = posCart[index].qty;
+                }
+            }
         }
-        renderTable();
+
+        recalculateTotals();
     }
 
     function removeItem(index) {
@@ -383,7 +465,6 @@
         renderTable();
     }
 
-    // Bottom Summary & Payment Calculations
     function recalculateTotals() {
         let subtotal = posCart.reduce((acc, item) => acc + item.subtotal, 0);
         let discount = parseFloat(document.getElementById('summary-discount').value) || 0;
@@ -398,14 +479,9 @@
         
         let changeElem = document.getElementById('summary-change');
         changeElem.innerText = change.toFixed(2);
-        if (change < 0) {
-            changeElem.className = 'h5 font-weight-bold text-danger mb-0';
-        } else {
-            changeElem.className = 'h5 font-weight-bold text-success mb-0';
-        }
+        changeElem.className = change < 0 ? 'h5 font-weight-bold text-danger mb-0' : 'h5 font-weight-bold text-success mb-0';
     }
 
-    // Toggle Payment Input Fields
     function togglePaymentFields() {
         let type = document.querySelector('input[name="payment_type"]:checked').value;
         let refGroup = document.getElementById('payment_reference_group');
@@ -422,7 +498,6 @@
         }
     }
 
-    // Add Customer AJAX
     async function storeCustomer(e) {
         e.preventDefault();
         const formData = new FormData(e.target);
@@ -440,16 +515,20 @@
         }
     }
 
-    // Process Order AJAX
     async function processOrderCheckout() {
+        let outletId = document.getElementById('outlet_id').value;
         let customerId = $('#customer_id').val();
-        if (!customerId) {
-            alert('Please select a customer first!');
+
+        if (!outletId) {
+            alert('Please select an outlet first!');
             return;
         }
-
+        if (!customerId) {
+            alert('Please select a customer!');
+            return;
+        }
         if (posCart.length === 0) {
-            alert('Your cart is empty! Please append products first.');
+            alert('Cart is empty!');
             return;
         }
 
@@ -460,6 +539,7 @@
 
         const payload = {
             _token: '{{ csrf_token() }}',
+            outlet_id: outletId,
             customer_id: customerId,
             items: posCart,
             payment_type: paymentType,
@@ -484,7 +564,7 @@
                 document.getElementById('summary-discount').value = '0.00';
                 document.getElementById('summary-paid-amount').value = '';
             } else {
-                alert('Error: ' + (data.message || 'Payment failed'));
+                alert('Error: ' + (data.message || 'Checkout failed'));
             }
         } catch (err) {
             console.error('Order error:', err);
