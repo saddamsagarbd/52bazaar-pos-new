@@ -28,7 +28,7 @@ class StoreUserRequest extends FormRequest
             'username' => 'required|min:4|max:25|alpha_dash:ascii|unique:users,username',
             'password' => 'required|min:6|required_with:password_confirmation',
             'password_confirmation' => 'required|min:6|same:password',
-            'role' => 'nullable|exists:roles,id', // Validating role existence if passed
+            'role' => 'nullable|exists:roles,name', // Validating role existence if passed
         ];
     }
 }

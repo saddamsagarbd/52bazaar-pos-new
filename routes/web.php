@@ -61,6 +61,7 @@ Route::middleware(['permission:user.menu'])->group(function () {
 
 // ====== CUSTOMERS ======
 Route::middleware(['permission:customer.menu'])->group(function () {
+    Route::post('/customers/{customer}/pay-due', [CustomerController::class, 'payDue'])->name('customer.payDue');
     Route::resource('/customers', CustomerController::class);
 });
 

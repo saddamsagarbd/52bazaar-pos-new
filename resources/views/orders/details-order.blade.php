@@ -171,13 +171,27 @@
                                         <td class="font-weight-bold text-primary" style="font-size: 1.1em;">
                                             {{ number_format($order->total, 2) }}
                                         </td>
-                                        </tr>
-                                        </tfoot>
-                                        </table>
-                                        </div>
-                                        </div>
-                                        </div>
-                                        </div>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="6" class="text-right font-weight-bold text-success" style="font-size: 1.1em;">
+                                            Paid</td>
+                                        <td class="font-weight-bold text-success" style="font-size: 1.1em;">
+                                            {{ number_format($order->pay_amount, 2) }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="6" class="text-right font-weight-bold text-danger" style="font-size: 1.1em;">
+                                            Due</td>
+                                        <td class="font-weight-bold text-danger" style="font-size: 1.1em;">
+                                            {{ number_format($order->due_amount, 2) }}
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        </div>
+    </div>
 @endsection

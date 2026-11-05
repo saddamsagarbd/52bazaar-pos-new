@@ -222,6 +222,11 @@
                 <span>Change Returned</span>
                 <span>{{ number_format($order->due_amount < 0 ? abs($order->due_amount) : 0, 2, '.', '') }}</span>
             </div>
+
+            <div class="d-flex justify-between mb-1">
+                <span>Due</span>
+                <span>{{ number_format($order->due_amount > 0 ? abs($order->due_amount) : 0, 2, '.', '') }}</span>
+            </div>
         </div>
 
         @if((isset($order->discount_amount) && $order->discount_amount > 0) || (isset($total_item_discount) && $total_item_discount > 0))

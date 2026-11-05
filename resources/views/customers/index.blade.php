@@ -57,8 +57,8 @@
                                     <input type="text" id="search" class="form-control" name="search"
                                         placeholder="Search customer" value="{{ request('search') }}">
                                     <div class="input-group-append">
-                                        <button type="submit" class="input-group-text bg-primary">
-                                            <x-heroicon-o-magnifying-glass class="w-5 h-5" />
+                                        <button type="submit" class="input-group-text bg-primary border-0">
+                                            <x-heroicon-o-magnifying-glass class="w-5 h-5 text-white" />
                                         </button>
                                     </div>
                                 </div>
@@ -79,17 +79,35 @@
                                 <th><x-sort-link name="email" label="Email" /></th>
                                 <th><x-sort-link name="phone" label="Phone" /></th>
                                 <th><x-sort-link name="city" label="City" /></th>
-                                <th>Action</th>
+                                <!-- New Columns Added -->
+                                <th>Total Shopping</th>
+                                <th>Total Payment</th>
+                                <th>Total Due</th>
+                                <th class="text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody class="ligth-body">
-                            @foreach ($customers as $customer)
+                            @forelse ($customers as $customer)
                                 <tr>
-                                    <td>{{ (($customers->currentPage() * 10) - 10) + $loop->iteration }}</td>
+                                    <td>{{ (($customers->currentPage() * request('row', 10)) - request('row', 10)) + $loop->iteration }}</td>
                                     <td>{{ $customer->name }}</td>
-                                    <td>{{ $customer->email }}</td>
-                                    <td>{{ $customer->phone }}</td>
-                                    <td>{{ $customer->city }}</td>
+                                    <td>{{ $customer->email ?? 'N/A' }}</td>
+                                    <td>{{ $customer->phone ?? 'N/A' }}</td>
+                                    <td>{{ $customer->city ?? 'N/A' }}</td>
+                                    
+                                    <!-- Total Shopping Count (koto bar shopping koreche) -->
+                                    <td>
+                                        <span class="badge badge-info">{{ $customer->orders_count ?? 0 }} Times</span>
+                                    </td>
+
+                                    <!-- Total Due Amount (koto taka baki ache) -->
+                                    <td>
+                                        <span class="font-weight-bold text-danger">৳{{ number_format($customer->total_payment ?? 0, 2) }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="font-weight-bold text-danger">৳{{ number_format($customer->total_due ?? 0, 2) }}</span>
+                                    </td>
+
                                     <td>
                                         <div class="d-flex align-items-center justify-content-center list-action">
                                             <a class="btn btn-info mr-2" data-toggle="tooltip" data-placement="top" title="View"
@@ -113,13 +131,17 @@
                                         </div>
                                     </td>
                                 </tr>
-                            @endforeach
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-4">No customers found.</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
 
                 <!-- Section: Pagination -->
-                <div class="d-flex justify-content-center">
+                <div class="d-flex justify-content-center mt-3">
                     {{ $customers->links() }}
                 </div>
             </div>

@@ -172,10 +172,14 @@ class RoleController extends Controller
     public function rolePermissionUpdate(Request $request, Int $id)
     {
         $role = Role::findOrFail($id);
-        $permissions = $request->permission_id;
 
-        if(!empty($permissions)) {
+        $permissionIds = $request->input('permission_id', []);
+
+        if (!empty($permissionIds)) {
+            $permissions = Permission::whereIn('id', (array) $permissionIds)->get();
             $role->syncPermissions($permissions);
+        } else {
+            $role->syncPermissions([]);
         }
 
         return Redirect::route('rolePermission.index')->with('success', 'Role Permission has been updated!');

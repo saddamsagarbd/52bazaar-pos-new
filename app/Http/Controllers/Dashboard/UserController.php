@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
 use Illuminate\Support\Facades\Hash;
 use Spatie\QueryBuilder\QueryBuilder;
 use Illuminate\Support\Facades\Storage;
@@ -50,7 +52,7 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(\App\Http\Requests\User\StoreUserRequest $request)
+    public function store(StoreUserRequest $request)
     {
         $validatedData = $request->validated();
         $validatedData['password'] = Hash::make($request->password);
@@ -97,7 +99,7 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(\App\Http\Requests\User\UpdateUserRequest $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
         $validatedData = $request->validated();
 

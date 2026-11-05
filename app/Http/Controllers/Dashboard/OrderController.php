@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Redirect;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Haruncpi\LaravelIdGenerator\IdGenerator;
 use App\Http\Requests\Order\StoreOrderRequest;
+use App\Models\PaymentTransaction;
 use App\Models\Stock;
 use App\Models\StockBatch;
 use Illuminate\Support\Facades\Log;
@@ -282,10 +283,17 @@ class OrderController extends Controller
             // 4. Order status complete update kora
             $order->update(['order_status' => 'complete']);
 
+            PaymentTransaction::create([
+                'order_id'    => $order->id,
+                'customer_id' => $order->customer_id,
+                'payment' => $order->pay_amount,
+                'payment_date' => Carbon::now(),
+            ]);
+
             // Sob thik thakle commit
             DB::commit();
 
-            return Redirect::route('order.pendingOrders')->with('success', 'Order has been completed and inventory adjusted successfully!');
+            return Redirect::route('order.pendingOrders')->with('success', 'Order has been completed, payment and inventory adjusted successfully!');
 
         } catch (\Exception $e) {
             // Kono error hole rollback kore dibe
@@ -361,23 +369,38 @@ class OrderController extends Controller
 
     public function updateDue(Request $request)
     {
-        $request->validate([
-            'order_id' => 'required|numeric',
-            'due_amount' => 'required|numeric',
-        ]);
-
         $order = Order::findOrFail($request->order_id);
-        $mainPay = $order->pay_amount;
-        $mainDue = $order->due_amount;
-
-        $paid_due = $mainDue - $request->due_amount;
-        $paid_pay = $mainPay + $request->due_amount;
-
-        $order->update([
-            'due_amount' => $paid_due,
-            'pay_amount' => $paid_pay,
+        
+        $request->validate([
+            'customer_id' => 'required|numeric',
+            'order_id' => 'required|numeric',
+            'due_amount' => 'required|numeric|min:0.01|max:' . $order->due_amount,
         ]);
 
-        return Redirect::route('order.pendingDue')->with('success', 'Due Amount Updated Successfully!');
+        $payAmount = (float) $request->due_amount;
+
+        DB::beginTransaction();
+
+        try {
+
+            $order->pay_amount += $payAmount;
+            $order->due_amount -= $payAmount;
+            $order->save();
+
+            DB::commit();
+
+            PaymentTransaction::create([
+                'order_id'    => $order->id,
+                'customer_id' => $order->customer_id,
+                'payment' => $payAmount,
+                'payment_date' => Carbon::now(),
+            ]);
+
+            return redirect()->back()->with('success', 'Due payment updated successfully for invoice ' . $order->invoice_no . '!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to update due payment: ' . $e->getMessage());
+        }
     }
 }

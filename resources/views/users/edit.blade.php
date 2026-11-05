@@ -94,7 +94,7 @@
                                     <select class="form-control @error('role') is-invalid @enderror" name="role">
                                         <option selected="" disabled>-- Select Role --</option>
                                         @foreach ($roles as $role)
-                                            <option value="{{ $role->id }}" {{ $userData->hasRole($role->name) ? 'selected' : '' }}>{{ $role->name }}</option>
+                                            <option value="{{ $role->name }}" {{ $userData->hasRole($role->name) ? 'selected' : '' }}>{{ $role->name }}</option>
                                         @endforeach
                                     </select>
                                     @error('role')
