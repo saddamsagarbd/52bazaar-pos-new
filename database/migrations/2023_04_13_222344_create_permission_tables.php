@@ -47,9 +47,9 @@ return new class extends Migration
          */
         Schema::create($tableNames['permissions'], function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('name');
-            $table->string('guard_name');
-            $table->string('group_name');
+            $table->string('name', 125);
+            $table->string('guard_name', 25);
+            $table->string('group_name', 191);
             $table->timestamps();
 
             $table->unique(['name', 'guard_name']);
@@ -102,7 +102,7 @@ return new class extends Migration
             ) {
                 $table->unsignedBigInteger($permissionPivotKey);
 
-                $table->string('model_type');
+                $table->string('model_type', 125);
 
                 $table->unsignedBigInteger($modelMorphKey);
 
