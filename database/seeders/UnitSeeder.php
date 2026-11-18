@@ -22,11 +22,15 @@ class UnitSeeder extends Seeder
                 'short_name' => 'kg',
             ],
             [
+                'name' => 'Gram',
+                'short_name' => 'grm',
+            ],
+            [
                 'name' => 'Liter',
                 'short_name' => 'ltr',
             ],
             [
-                'name' => 'Milliliter',
+                'name' => 'Mili-Liter',
                 'short_name' => 'ml',
             ],
             [

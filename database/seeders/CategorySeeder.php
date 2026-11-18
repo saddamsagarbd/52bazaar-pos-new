@@ -24,11 +24,17 @@ class CategorySeeder extends Seeder
             'Office Supplies'
         ];
 
-        foreach ($categories as $category) {
-            Category::create([
-                'name' => $category,
-                'slug' => Str::slug($category),
-            ]);
+        $categories = [];
+
+        if(!empty($categories)){
+
+            foreach ($categories as $category) {
+                Category::create([
+                    'name' => $category,
+                    'slug' => Str::slug($category),
+                ]);
+            }
+
         }
     }
 }

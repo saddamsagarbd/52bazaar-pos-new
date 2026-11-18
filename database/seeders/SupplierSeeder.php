@@ -33,8 +33,14 @@ class SupplierSeeder extends Seeder
             ],
         ];
 
-        foreach ($suppliers as $supplier) {
-            Supplier::create($supplier);
+        $suppliers = [];
+
+        if(!empty($suppliers)){
+
+            foreach ($suppliers as $supplier) {
+                Supplier::create($supplier);
+            }
+
         }
     }
 }

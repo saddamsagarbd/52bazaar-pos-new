@@ -45,8 +45,14 @@ class EmployeeSeeder extends Seeder
             ],
         ];
 
-        foreach ($employees as $employee) {
-            Employee::create($employee);
+        $employees = [];
+
+        if(!empty($employees)){
+
+            foreach ($employees as $employee) {
+                Employee::create($employee);
+            }
+
         }
     }
 }
