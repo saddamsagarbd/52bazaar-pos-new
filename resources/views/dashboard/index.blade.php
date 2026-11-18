@@ -21,14 +21,14 @@
             <div class="col-lg-12 mb-4">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h3 class="font-weight-bold">Dashboard Overview</h3>
+                        <h3 class="font-weight-bold">Dashboard</h3>
                         <p class="mb-0 text-muted">Welcome back, {{ auth()->user()->name }}! Here's what's happening in your
                             store today.</p>
                     </div>
                     <div>
                         <a href="{{ route('pos.index') }}" class="btn btn-primary">
                             <x-heroicon-o-computer-desktop class="w-5 h-5 mr-2" />
-                            Go to POS
+                            POS
                         </a>
                     </div>
                 </div>
@@ -45,11 +45,11 @@
                                     <h5 class="font-weight-bold text-primary mb-3">{{ $outlet->name }}</h5>
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <span class="text-muted font-weight-bold">Collection (Paid):</span>
-                                        <span class="h6 font-weight-bold text-success mb-0">BDT {{ number_format($outlet->total_paid ?? 0, 2) }}</span>
+                                        <span class="h6 font-weight-bold text-success mb-0">৳ {{ number_format($outlet->total_paid ?? 0, 2) }}</span>
                                     </div>
                                     <div class="d-flex justify-content-between align-items-center">
                                         <span class="text-muted font-weight-bold">Total Due:</span>
-                                        <span class="h6 font-weight-bold text-danger mb-0">BDT {{ number_format($outlet->total_due ?? 0, 2) }}</span>
+                                        <span class="h6 font-weight-bold text-danger mb-0">৳ {{ number_format($outlet->total_due ?? 0, 2) }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -105,7 +105,7 @@
                                         <tr>
                                             <td>{{ $order->created_at->format('d M Y') }}</td>
                                             <td>{{ $order->customer->name ?? 'Walk-in Customer' }}</td>
-                                            <td>${{ number_format($order->total, 2) }}</td>
+                                            <td>৳{{ number_format($order->total, 2) }}</td>
                                             <td>
                                                 <span
                                                     class="badge {{ $order->order_status == 'complete' ? 'bg-success' : 'bg-warning' }}">

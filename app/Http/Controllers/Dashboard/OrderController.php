@@ -110,7 +110,13 @@ class OrderController extends Controller
 
             $discount = (float) $request->input('discount', 0);
             $vat = 0; 
-            $net_payable = ($sub_total - $discount) + $vat;
+            $raw_payable = ($sub_total - $discount) + $vat;
+            $fraction = $raw_payable - floor($raw_payable);
+            if ($fraction >= 0.50) {
+                $net_payable = ceil($raw_payable);
+            } else {
+                $net_payable = floor($raw_payable);
+            }
             
             $pay_amount = (float) $request->input('pay_amount', 0);
             $due_amount = $net_payable - $pay_amount;

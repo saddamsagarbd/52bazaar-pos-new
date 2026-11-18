@@ -74,7 +74,7 @@
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <h6 class="text-muted">Salary</h6>
-                                        <p class="font-weight-bold text-success">${{ number_format($employee->salary, 2) }}
+                                        <p class="font-weight-bold text-success">৳{{ number_format($employee->salary, 2) }}
                                         </p>
                                     </div>
                                     <div class="col-md-6 mb-3">

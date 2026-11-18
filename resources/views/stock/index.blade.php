@@ -104,7 +104,7 @@
                                 <td>{{ $index ? ++$index : 1 }}</td>
                                 <td>{{ $stock->product->name ?? 'N/A' }}</td>
                                 <td>{{ $stock->outlet->name ?? 'N/A' }}</td>
-                                <td>{{ number_format($stock->quantity, 2) }}</td>
+                                <td>{{ number_format($stock->quantity, 2) }}{{ $stock->product->unit ? " (". $stock->product->unit->short_name .")" : "" }}</td>
                                 <!-- <td>{{ number_format($stock->purchase_rate, 2) }}</td> -->
                                 <td>{{ number_format($stock->selling_rate, 2) }}</td>
                                 <td class="text-center">

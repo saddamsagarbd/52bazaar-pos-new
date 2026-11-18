@@ -2,7 +2,7 @@
 <div class="iq-sidebar sidebar-default ">
     <div class="iq-sidebar-logo d-flex align-items-center justify-content-between">
         <a href="{{ route('dashboard') }}" class="header-logo">
-            <img src="{{ asset('assets/images/logo.png') }}" class="img-fluid rounded-normal light-logo" alt="logo"><h5 class="logo-title light-logo ml-3">POSDash</h5>
+            <img src="{{ asset('assets/images/logo.png') }}" class="img-fluid rounded-normal light-logo" alt="logo"><h5 class="logo-title light-logo ml-3">sBOS</h5>
         </a>
         <div class="iq-menu-bt-sidebar ml-0">
             <x-heroicon-o-bars-3 class="wrapper-menu w-8 h-8" />
@@ -220,15 +220,15 @@
                                 <li class="{{ Request::is(['permission', 'permission/create', 'permission/edit/*']) ? 'active' : '' }}">
                                     <a href="{{ route('permission.index') }}">
                                         <x-heroicon-o-arrow-right class="w-4 h-4" /><span>Permissions</span>
-                                        </a>
-                                        </li>
-                                        <li class="{{ Request::is(['role', 'role/create', 'role/edit/*']) ? 'active' : '' }}">
-                                            <a href="{{ route('role.index') }}">
+                                    </a>
+                                </li>
+                                <li class="{{ Request::is(['role', 'role/create', 'role/edit/*']) ? 'active' : '' }}">
+                                    <a href="{{ route('role.index') }}">
                                         <x-heroicon-o-arrow-right class="w-4 h-4" /><span>Roles</span>
-                                        </a>
-                                        </li>
-                                        <li class="{{ Request::is(['role/permission*']) ? 'active' : '' }}">
-                                            <a href="{{ route('rolePermission.index') }}">
+                                    </a>
+                                </li>
+                                <li class="{{ Request::is(['role/permission*']) ? 'active' : '' }}">
+                                    <a href="{{ route('rolePermission.index') }}">
                                         <x-heroicon-o-arrow-right class="w-4 h-4" /><span>Role in Permissions</span>
                                         </a>
                                         </li>
@@ -241,8 +241,8 @@
                         <a href="{{ route('users.index') }}" class="svg-icon">
                             <x-heroicon-o-users class="w-6 h-6" />
                             <span class="ml-3">Users</span>
-                            </a>
-                            </li>
+                        </a>
+                    </li>
                 @endif
 
                 @if (auth()->user()->can('database.menu'))
@@ -250,8 +250,8 @@
                         <a href="{{ route('backup.index') }}" class="svg-icon">
                             <x-heroicon-o-circle-stack class="w-6 h-6" />
                             <span class="ml-3">Backup Database</span>
-                            </a>
-                            </li>
+                        </a>
+                    </li>
                 @endif
 
                 <li class="{{ Request::is('help*') ? 'active' : '' }}">

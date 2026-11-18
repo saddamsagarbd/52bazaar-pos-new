@@ -103,7 +103,7 @@
                                     <td>{{ $employee->name }}</td>
                                     <td>{{ $employee->email }}</td>
                                     <td>{{ $employee->phone }}</td>
-                                    <td>${{ number_format($employee->salary, 2) }}</td>
+                                    <td>৳{{ number_format($employee->salary, 2) }}</td>
                                     <td>{{ $employee->city }}</td>
                                     <td>
                                         <div class="d-flex align-items-center justify-content-center list-action">

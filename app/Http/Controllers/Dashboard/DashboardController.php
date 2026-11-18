@@ -74,8 +74,8 @@ class DashboardController extends Controller
     public function index()
     {
         // 1. Key Metrics (Overall)
-        $total_paid = Order::sum('pay_amount');
-        $total_due = Order::sum('due_amount');
+        $total_paid = Order::where('order_status', 'complete')->sum('pay_amount');
+        $total_due = Order::where('order_status', 'complete')->sum('due_amount');
         $complete_orders = Order::where('order_status', 'complete')->count();
         $pending_orders = Order::where('order_status', 'pending')->count();
 
@@ -84,10 +84,10 @@ class DashboardController extends Controller
 
         // 3. Outlet-wise Payment and Due Statistics
         $outlet_stats = Outlet::withSum(['orders as total_paid' => function($query) {
-            $query->select(DB::raw('SUM(pay_amount)'));
+            $query->select(DB::raw('SUM(pay_amount)'))->where('order_status', 'complete');
         }], 'pay_amount')
         ->withSum(['orders as total_due' => function($query) {
-            $query->select(DB::raw('SUM(due_amount)'));
+            $query->select(DB::raw('SUM(due_amount)'))->where('order_status', 'complete');
         }], 'due_amount')
         ->get();
 
